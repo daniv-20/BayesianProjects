@@ -21,7 +21,6 @@ simdat = simdat %>%
   mutate(mean.post = round(alpha.post / (alpha.post + beta.post), digits = 2)) %>%
   mutate(var.post = round((alpha.post * beta.post) / ((alpha.post + beta.post)^2 * (alpha.post + beta.post + 1)), digits = 4))
 
-simdat %>% flextable::flextable()
 return(simdat)
 }
 
@@ -38,7 +37,6 @@ get_beta_post = function(alpha.prior, beta.prior, y, N){
     mutate(mean.post = round(alpha.post / (alpha.post + beta.post), digits = 2)) %>%
     mutate(var.post = round((alpha.post * beta.post) / ((alpha.post + beta.post)^2 * (alpha.post + beta.post + 1)), digits = 4))
   
-  simdat %>% flextable::flextable()
   return(simdat)
 }
 
