@@ -1,3 +1,4 @@
+
 library(tidyverse)
 
 bayes_sim = function(alpha.prior = 1, beta.prior = 1, N_total = 20, events = 0:20, theta_target = 0.25){
@@ -26,3 +27,27 @@ simdat = data.frame(events = events,
          `Pr[theta <= theta_target]` = pbeta(theta_target, alpha.post, beta.post))
 return(simdat)
 }
+
+get_beta_post = function(alpha.prior, beta.prior, y, N){
+  simdat = data.frame(y = y, alpha.post = c(NA), beta.post = c(NA))
+  
+  ## note: alpha new = alpha old + y new, beta new = beta old + N - y new
+  
+  simdat$alpha.post = alpha.prior + simdat$y
+  simdat$beta.post = beta.prior + N - simdat$y
+  
+  simdat = simdat %>%
+    mutate(mean.post = round(alpha.post / (alpha.post + beta.post), digits = 2)) %>%
+    mutate(var.post = round((alpha.post * beta.post) / ((alpha.post + beta.post)^2 * (alpha.post + beta.post + 1)), digits = 4))
+  
+  simdat %>% flextable::flextable()
+  return(simdat)
+}
+
+## Generate patients and outcomes for binary outcome
+gen_binom_pats = function(N_pats, prob_success){
+  results = list()
+  results$pats = data.frame(sid = c(1:N_pats), outcome = rbinom(N_pats, 1, prob_success))
+  results$summary = data.frame(y = sum(results$pats$outcome), N = N_pats)
+  return(results)
+  }

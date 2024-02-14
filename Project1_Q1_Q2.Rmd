@@ -1,0 +1,84 @@
+---
+title: "Project 1: q1,2"
+author: "Danielle Vaithilingam"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  pdf_document:
+    number_sections: false
+    toc: true
+    toc_depth: 4
+  html_document:
+    toc: true
+    toc_depth: '4'
+    df_print: paged
+subtitle: Introduction to Applied Bayesian Data Anlaysis
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("C:/Users/dvait/Desktop/GitRepos/BayesProject/BayesianProjects/bayesSim.R", echo=FALSE)
+library(flextable)
+library(tidyverse)
+library(ggplot2)
+set.seed(1234)
+```
+
+*1.	You are working with an investigator to design a Phase II trial of a new drug to treat acute myeloid leukemia (AML) that is refractory to the standard chemotherapy regimen. Eligible patients, all of whom have failed on the first line therapy, will be selected based on the presence of a specific molecular feature of their cancer that the new drug proposes to target. An earlier Phase I trial has already been completed to select a maximum tolerated dose (MTD). The new trial is divided into two parts. The objective of the first part of the trial is to verify the tolerability of the dose selected as the MTD in the previous Phase I trial. To accomplish this, the new trial will enroll and treat 20 patients at the MTD from the previous trial. A list of adverse events (AE) of interest have been identified as dose-limiting toxicities (DLT) that, if they should occur with greater than 25% probability would represent risks that outweigh the potential benefits of the drug. DLTs will be monitored in each patient for 28 days after starting treatment. The investigators intend to monitor the accumulating toxicity data in groups of 5 patients. If there is a greater than 80% probability that the probability of DLT is 25% or higher then the study should stop. Design a simple statistical monitoring rule for the probability of DLT using what you know about the beta-binomial distribution. You may assume a flat prior, i.e., Beta(1,1).* 
+
+```{r, tbl.cap = "Posterior probability that DLT rate > 25%"}
+## flat prior
+a0 = 1
+b0 = 1
+## events = dlts
+## N-total = num patient treated
+#bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = 20, events = 0:20, theta_target = 0.25)
+
+t.5 = bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = 5, events = 0:5, theta_target = 0.25)
+t.10 = bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = 10, events = 0:10, theta_target = 0.25)
+t.15 = bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = 15, events = 0:15, theta_target = 0.25)
+t.20 = bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = 20, events = 0:20, theta_target = 0.25)
+
+table.df = data.frame(ndlt = c(0:20), t5 = c(t.5$`Pr[theta <= theta_target]`, rep(NA,15)), t10 = c(t.10$`Pr[theta <= theta_target]`, rep(NA,10)), t15 = c(t.15$`Pr[theta <= theta_target]`, rep(NA,5)), t20 = c(t.20$`Pr[theta <= theta_target]`)) %>% mutate(t5 = 1-t5, t10 = 1-t10, t15 = 1-t15, t20 = 1-t20)
+
+table1 = flextable(table.df) %>% 
+  colformat_double(j = c(2:5), digits = 3) %>%
+  set_header_labels(ndlt = "Number of DLTs", t5 = "5 Patients Treated", t10 = "10 Patients Treated", t15 = "15 Patients Treated", t20 = "20 Patients Treated") %>%
+  bold(~t5 >= 0.8, 2) %>% bold(~t10 >= 0.8, 3) %>% bold(~t15 >= 0.8, 4) %>% bold(~t20 >= 0.8, 5); table1
+
+```
+			
+
+b)	Based on the table above, how many patients with DLTs would it take for the trial to stop after 5, 10, 15, or 20 patients are treated?
+
+Based on the table above, it would take 2 patients with DLTS for 5 patients treated, 4 for 10 patients treated, 5 for 15 patients treated and 7 for 20 patients treated. 
+
+2.	In addition to being concerned about toxicity of the new treatment, the investigators who are proposing the study described in question 1 are also concerned about continuing to expose the patients to the possible side effects of the drug if there is little expectation of benefit. If the first part of the trial is successful, and all 20 patients are treated without the trial stopping early due to toxicity concerns, then the investigators wish to enroll an additional 20 patients to estimate the probability of response to treatment. However, before doing so, the investigators want some assurance that the treatment might be beneficial. Therefore, they have asked to create a futility rule by which the investigators might stop the study if there is no evidence of benefit after treating the first 20 patients. The rule should be based on assessment of a binary response outcome (the details of how this is evaluated are not important for purposes of this question) that is evaluated on each patient at 28 days after starting treatment. A total of 20 patients should be available for this interim analysis. Historical data suggests that the minimum acceptable probability of response for the new drug is 55%. This estimate considers the efficacy of the current standard care and the minimum clinically important difference (the improvement in the response rate over the standard care that the new drug would have to provide to change medical practice). Use similar methods to what you employed to answer Question 1 to make a futility rule for the study. The futility rule would be triggered if the posterior probability of a suboptimal response rate (below 55%) on the new drug is greater than 80%. In other words, if the posterior probability exceeds 80% then the trial would stop with 20 patients. Otherwise, 20 additional may enroll and the final data analysis will consider 40 patients. You may assume a flat prior, i.e., Beta(1,1).
+
+a)	Fill in the following table to describe the futility monitoring rule.
+Number of Responses Observed	Posterior Probability of a Suboptimal Response	Observed Response Probability	Treatment is Futile? (yes/no)
+
+```{r, tbl.cap = "Futility Monitoring Rule"}
+## flat prior
+a0 = 1
+b0 = 1
+N_total = 20
+responses = 20 - c(0:20); responses
+obs.prob = responses / 20; obs.prob
+sim = bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = N_total, events = responses, theta_target = 0.55)
+posterior.prob = sim$`Pr[theta <= theta_target]`
+## events = dlts
+## N-total = num patient treated
+#bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = 20, events = 0:20, theta_target = 0.25)
+
+tbl2 = data.frame(n.resp = responses, post = posterior.prob, obs = obs.prob) %>%
+  mutate(fut = ifelse(post > .80, "yes", "no"))
+
+table2 = flextable(tbl2) %>%
+  colformat_double(j = c(2), digits = 3) %>%
+  set_header_labels(n.resp = "Number of Responses Observed", post = "Posterior Probability of Suboptimal Response \n < 55%", obs = "Observed Response Probability", fut = "Treatment is Futile?"); table2
+```
+	
+
+b)	Based on the table above, what is the largest number of responses that would result in triggering the futility rule?
+
+Based on the table above, the largest number of responses that triggers the futility rule is 9. 
