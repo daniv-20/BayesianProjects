@@ -1,0 +1,113 @@
+---
+title: "Project 4 Template"
+subtitle: "Bayesian Analysis of Question 4 from the Master's Proficiency Exam"
+author: "Jesse Troy, PhD"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  pdf_document:
+    number_sections: true
+    toc: true
+    toc_depth: 3
+urlcolor: blue
+header-includes:
+  - \usepackage{xcolor}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Background
+
+The enclosed dataset called OSTEO.CSV includes the results of a prospective cohort study that followed 500 women age 55 or older for 1 year after diagnosis with osteoporosis. The primary outcome of the study was bone fracture (yes/no) within the 1st year of osteoporosis diagnosis. The investigators hypothesized that women who had a history of bone fractures prior to their osteoporosis diagnosis would be at higher risk of having an osteoporosis-related fracture than those who had no such prior history. A potentially important prognostic variable was age at diagnosis of osteoporosis, which was recorded in years. You have already done a frequentist analysis of this dataset. Now, you will analyze the same dataset using a Bayesian logistic regression model. You will complete the analysis by answering the following questions.
+
+# Question 1: Write the Bayesian Logistic Regression Model
+
+Write a simple Bayesian logistic regression model for fracture at 1 year post-diagnosis with osteoporosis based only on a history of prior fracture. Follow the example notation used in your textbook in Chapter 13, equation 13.5. In addition to specifying the model in mathematical notation, give a plain English description of what the notation means. Do this separately for the data model and the priors as indicated below.
+
+## Write the data model
+
+Write the data model here.
+
+## Write the model for the prior
+
+Specify "vague" normal prior distributions for the parameters in your data model as follows. 
+
+### Prior for Beta0
+
+First, assume your prior information says that 20% of women will have fractures at 1 year when they don't have a prior history of fracture. Your level of uncertainty about this is quite high. A prior that has a 95% credible interval ranging from about 12% to 31% would capture your uncertainty well. What are the parameters of a normally distributed prior for $\beta_0$ that express this uncertainty?
+
+### Prior for Beta1
+
+Assume that you have prior information that suggests a history of fractures is expected to increase the probability of fracture by 10% over not having a prior history (i.e., a 30% probability of fracture at 1 year in women who have a prior history of fracture vs. 20% probability in women without a prior history). But your prior information is highly uncertain. In fact, it seems plausible that women with a prior history of fracture may have as little as a 10% probability of fracture at 1 year (the same risk in women without a prior history!) or as high as a 62% risk of fracture at 1 year (a very large increase in risk over women without a prior history). Based on this information, specify a normally distributed prior for $\beta_1$ on the log-odds scale and write an interpretation of the mean and 95% credible interval with respect the clinical problem (i.e., whether a prior history promotes or reduces the risk of fracture at 1 year).
+
+State the mean and 95% credible interval for the $\beta_1$ prior on the odds ratio scale and write an interpretation.
+
+# Question 2: Simulation of the Priors
+
+Simulate the priors for your model. Plot the theoretical priors as well as the MCMC simulated priors and verify the simulations are correct. State the mean, median, and 95% credible intervals for your priors and write interpretations for these. 
+
+HINT: Follow the instructions in the stan_glm() help pages and use a model without an intercept. Include a term for no prior history of fracture instead of the intercept: 
+
+"If you prefer to specify a prior on the intercept without the predictors being auto-centered, then you have to omit the intercept from the formula and include a column of ones as a predictor, in which case some element of [prior] specifies the prior on it, rather than [prior_intercept]."
+
+More information is [here](https://mc-stan.org/rstanarm/articles/priors.html).
+
+
+# Question 3: Update your prior belief using the OSTEO data
+
+Now, use the OSTEO data set to update your priors. Plot the posterior distribution for the change in log-odds of fracture at 1 year associated with a prior history of fracture. Interpret the median and 95% highest posterior density credible interval with respect to the research question about whether prior history of fracture is a risk factor for fracture at 1 year after diagnosis with osteoporosis. Repeat these steps on the odds ratio scale. 
+
+What is the posterior probability that the odds ratio is greater than 1? What does this imply about the risk of fracture at 1 in women with vs. without a prior history of fracture?
+
+What is the posterior probability that the odds ratio is greater than 2?
+
+What is the value of the odds ratio at which the posterior probability exceeds 80%?
+
+Based on the above posterior probabilities, write a summary sentence that describes the strength of the evidence you now that that a prior history of fracture is a risk factor for fracture 1 year after diagnosis with osteoporosis.
+
+# Question 4: Including Age in the Model
+
+## Writing the Data Model
+
+Write the data model when the interaction term is included. Use a similar format to what you used to write the data model in question 1. In your notation, use $\beta_0$, $\beta_1$, and $\beta_2$ as the intercept, prior history of fracture, and age respectively and explain what each parameter means. Remember, rstanarm gives model results without centering (even though the prior for the intercept is based on the other predictors being centered; see the next question).  
+
+## Prior Distributions for the Regression Parameters
+
+So far you have used informative but vague priors for the risk of fracture in women with and without a prior history of fracture. The priors are vague in the sense that they suggest an expected difference in the population comparing women with and without a prior history, but the level of uncertainty is very high. 
+
+Suppose now that you want to include age in the model since you already know age is a confounder in the population and your descriptive analysis demonstrates age is a confounder in your dataset. Suppose however that you don't have any pre-study information about the risk of fracture in women with and without a prior history according to age. So, instead of using vague, informative priors you will not let rstanarm select weakly informative priors scaled to match your data. 
+
+Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates. Write the priors that rstanarm has identified. 
+
+## Posterior
+
+Now update the priors with the data in the OSTEO dataset. Plot the posterior distribution for prior history of fracture and state the median and 95% highest posterior density credible interval on the odds ratio scale. What has happened to the posterior distribution for $\beta_1$ now that age is included in the model (as compared to the first model you ran without age)? Is this consistent with what you expected would happen? Why or why not?
+
+# Question 5: Evaluating Interaction Between Age and a Prior History of Fracture
+
+## Write the Data Model
+Write the data model. Use a similar format to what you used to write the data model in question 1. In your notation, use $\beta_0$, $\beta_1$, and $\beta_2$ as the intercept, prior history of fracture, and age respectively and explain what each parameter means. Remember, rstanarm gives model results without centering (even though the prior for the intercept is based on the other predictors being centered; see the next question).  
+
+## Prior Distributions for the Regression Parameters
+Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates, as well as the interaction between these two factors. Write the priors that rstanarm has identified.
+
+## Posterior
+
+Now update the priors with the data in the OSTEO dataset. Plot the posterior distribution for the interaction term and interpret the median and 95% highest posterior density credible interval. What impact does older age have on the relationship between fracture risk in those with and without prior history?
+
+Write a single sentence that summarizes the strength of evidence you have that age interacts with prior history of fracture to increase the risk of fracture 1 year after diagnosis with osteoporosis?
+
+# Question 6: Predicting Fracture Risk Based on Prior History and Age
+
+Make a plot that shows the posterior predicted probability of fracture at 1 year post-diagnosis with osteoporosis by age at diagnosis (55 to 80 years, in increments of 5 years) and prior history of fracture. HINT: Your plot should show the age at diagnosis on the X-axis and the posterior predicted probability on the Y axis. There should be two lines on the plot: one for women without a prior history of fracture and another for women who have a prior history of fracture.
+
+# Question 7: Posterior Predictive Check
+
+Perform a posterior predictive check examining how consistent the model is with the original data. Use 100 datasets. Explain how this posterior predictive check works and what you conclude from the results.
+
+# Question 8: Identifying Women at High Risk of Fracture
+
+Suppose that in clinical practice an intervention would be warranted in women who have a posterior predicted probability of fracture at 1 year that exceeds 40%. First, use this cutoff for predicting a woman is at high risk to evaluate the model based on the data you have. State the sensitivity, specificity, overall accuracy, and positive predictive value and interpret each of these in light of the clinical problem of identifying women eligible for an intervention to prevent fracture within 1 year of diagnosis with osteoporosis. HINT: rstanarm doesn't give you the positive predictive value by default but you can use Bayes' theorem to find positive predictive value based on sensitivity, specificity and prevalence.
+
+Then, use cross validation to evaluate the future performance of the model. Again, state the sensitivity, specificity, overall accuracy, and positive predictive value and interpret each of these.

@@ -1,0 +1,70 @@
+---
+title: "Project 2 Template"
+author: "Jesse Troy"
+date: "12/16/2023"
+output: 
+  pdf_document:
+    number_sections: true
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Safety Monitoring Rule
+
+## Objective of the Safety Monitoring Rule
+Describe in your own words what the safety monitoring rule is intended to do.
+
+## Parameter to Estimate and Hypothesis
+Describe the parameter to be estimated by the safety monitoring rule. What is the  minimum clinically relevant value for this parameter? What is the criterion related to this minimum clinically relevant value that should "trigger" a concern about the safety of the study participants?
+
+## Statistical Model
+Describe in your own words the beta-binomial statistical model that will be used for the safety monitoring rule by filling in the following sections.
+
+### Prior
+Define the prior distribution mathematically and in plain English words. Your explanation should explain what information the prior contains about the parameter to be estimated.
+
+### Likelihood
+Define the likelihood function mathematically and in plain English words. How is the likelihood capturing information about the parameter to be estimated? 
+
+
+### Posterior Distribution
+Show mathematically how the posterior distribution is specified.
+
+### Critical Boundary
+Show a table that illustrates how the monitoring rule critical boundary of 4 events was identified based on the posterior distribution for different numbers of observed events (from 0 to 50).
+
+# Operating Characteristics of the Efficacy Analysis
+
+## Objective
+Describe in your own words what the objective of the efficacy analysis is.
+
+## Parameter to Estimate and Hypothesis
+Describe the parameter to be estimated in the efficacy analysis, the minimum clinically relevant value for the parameter, and the hypothesis to be tested. What are the success criteria for the efficacy analysis?
+
+## Statistical Model
+Show the statistical model for the analysis, including prior, likelihood and posterior distribution. State these mathematically and in plain English as they relate to the objectives of the study. Note, there are 3 priors discussed in the protocol: one used for the primary analysis and two used for sensitivity analyses, the "optimistic" and "pessimisic" priors. Discuss why these priors are labeled as optimistic or pessimistic and what impact you think they might have on the posterior distribution. 
+
+## Definition of Power and Type I Error in the Context of the Efficacy Analysis
+Any stochastic rule for success or failure could lead to an incorrect conclusion. How are the possibilities for drawing an incorrect conclusion represented in the Bayesian framework for this trial? Explain this plan English. 
+
+## Design of Your Program to Evaluate the Operating Characteristics of the Efficacy Analysis
+
+### Inputs 
+Describe the input that goes into the program.
+
+### Outputs
+Describe what the program creates as a final result.
+
+### Algorithm
+Describe how the program operates to produce output from the input. You can use words or draw a diagram, or both.
+
+## Program Code
+
+Show your program code here.
+
+## Comparison of Program Output to the Results in the Study Protocol
+Create two tables--one for Type I error and one for Power--that compare your results with those shown in the protocol so you can verify that your program produces the correct results.
