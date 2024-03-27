@@ -20,7 +20,7 @@ library(ggpubr)
 library(flextable)
 library(ggplot2)
 library(dpl)
-source("C:/Users/dvait/Desktop/GitRepos/BayesProject/BayesianProjects/bayesSim.R")
+source("./bayesSim.R")
 set.seed(2648)
 knitr::opts_chunk$set(echo = TRUE)
 ```
