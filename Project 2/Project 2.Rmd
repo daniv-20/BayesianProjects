@@ -1,7 +1,7 @@
 ---
-title: "Project 2 Template"
-author: "Jesse Troy"
-date: "12/16/2023"
+title: "Project 2"
+author: "Sam Albertson, Suz Angermeier, & Dani Vaithilingam"
+date: "3/10/2023"
 output: 
   pdf_document:
     number_sections: true
@@ -19,6 +19,7 @@ library(bayesplot)
 library(ggpubr)
 library(flextable)
 library(ggplot2)
+library(dpl)
 source("C:/Users/dvait/Desktop/GitRepos/BayesProject/BayesianProjects/bayesSim.R")
 set.seed(2648)
 knitr::opts_chunk$set(echo = TRUE)
@@ -27,33 +28,40 @@ knitr::opts_chunk$set(echo = TRUE)
 # Safety Monitoring Rule
 
 ## Objective of the Safety Monitoring Rule
-*Describe in your own words what the safety monitoring rule is intended to do.*
-
-The goal of the safety monitoring rule is to ensure that the QUITNOW device is safe for participants to use and allows for the stopping of the study if the device is detected to be "unsafe". In this case, "unsafe" is defined having an 80% chance or more of greater than 5% of participants having grade 3 (severe) side effects and device-related effects.
-
-
+The goal of the safety monitoring rule is to set a trigger for determining when the rate of severe adverse events is too high. A maximum acceptable rate is pre-specified, and if we are confident that the probability exceeds this level, the study is discontinued. 
 
 ## Parameter to Estimate and Hypothesis
-*Describe the parameter to be estimated by the safety monitoring rule. What is the  minimum clinically relevant value for this parameter? What is the criterion related to this minimum clinically relevant value that should "trigger" a concern about the safety of the study participants?*
-
-
-The parameter to be estimated by 
+The parameter we try to estimate for the safety monitoring rule is the proability $\theta$ that a patient will have an adverse event of Grade 3 (severe) or higher. We define our maximum clinically acceptable risk level as $\theta_{mcid}$ = 0.05; our safety monitoring rule is triggered if there is a greater than 80% chance that $\theta > \theta_{mcid}$. 
 
 ## Statistical Model
-Describe in your own words the beta-binomial statistical model that will be used for the safety monitoring rule by filling in the following sections.
+
+The beta-binomial model is a functional family of a prior (beta distribution) and likelihood (binomial distribution) function. These are multiplied together at a range of values of $\theta$ to generate our posterior distribution, from which we can estimate the probability that $\theta > \theta_{mcid}$
+
 
 ### Prior
-Define the prior distribution mathematically and in plain English words. Your explanation should explain what information the prior contains about the parameter to be estimated.
+The prior distribution represents our knowledge of the adverse event rate before conducting the study. We use a $Beta(1,1)$ prior, which contains no information about the parameter, to represent our lack of informaton about the event rate.
 
 ### Likelihood
-Define the likelihood function mathematically and in plain English words. How is the likelihood capturing information about the parameter to be estimated? 
-
+The likelihood function represents the chance of observing the number of events seen in the trial, given a proposed risk level. We define this mathematically using a $Binomial(N_{events}, N_{total}, \theta)$ distribution. This provides an empirical estimate of the event rate parameter.
 
 ### Posterior Distribution
-Show mathematically how the posterior distribution is specified.
+We define the posterior distribution as the product of the prior and the likelihood of our data:
+
+$P[Y|X] \sim P[Y] * L[Y | X]$
 
 ### Critical Boundary
-Show a table that illustrates how the monitoring rule critical boundary of 4 events was identified based on the posterior distribution for different numbers of observed events (from 0 to 50).
+
+```{r safety_table}
+f_post <- function(x){
+  pct <- signif(1 - pbeta(0.05, x + 1, 50 - x + 1), 3)
+  return(paste0(pct, "%"))
+}
+
+df_post <- data.frame(Events = 0:50) %>%
+  mutate(`Posterior Probability` = f_post(Events))
+```
+
+\newpage
 
 # Operating Characteristics of the Efficacy Analysis
 
