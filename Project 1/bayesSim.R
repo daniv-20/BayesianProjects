@@ -1,4 +1,3 @@
-
 library(tidyverse)
 
 bayes_sim = function(alpha.prior = 1, beta.prior = 1, N_total = 20, events = 0:20, theta_target = 0.25){
