@@ -1,0 +1,148 @@
+---
+title: "Project 3 Template: The Normal-Normal Conjugate Family"
+author: "Jesse Troy"
+date: "12/16/2023"
+output: 
+  pdf_document:
+    number_sections: true
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(HDInterval)
+library(rstan)
+library(rstanarm)
+library(bayesplot)
+library(ggpubr)
+library(flextable)
+library(ggplot2)
+library(gtsummary)
+library(gt)
+source("./bayesSim.R")
+set.seed(2648)
+
+theme_set(bayesplot::theme_default())
+
+## Set up dataset -------------------
+data.raw = ChickWeight %>%
+  filter(Time %in% c(0, 21))
+
+data = pivot_wider(data.raw, id_cols = c("Chick"), names_from = "Time", names_prefix = "Time", values_from = "weight") %>%
+  na.omit() %>%
+  mutate(Time0= as.numeric(Time0))
+
+colnames(data) = c("Chick", "BaselineWeight", "EndWeight")
+```
+
+# Background
+This template uses a similar format as the course notes for this class. In fact, you should imagine that you are designing a lesson to teach the normal-normal conjugate model as you complete this template. Any good lesson needs an example data set to illustrate the concepts. Feel free to use something from a project you've been working on (be careful not to use data without permission!), find a dataset online, or create a fictitious example and simulate the data for the example. 
+
+In this section you should give some brief background on the kinds of problems that the normal-normal model is appropriate for, what the target of inference is, and briefly introduce the example you are going to use. 
+
+# Normal PDF
+Imagine you are explaining the normal distribution to someone who has never heard of it. Include all the basics such as the equation for the PDF, the mean, median, mode, variance, etc. as well as a plain language description of what kinds of problems normal distributions are good models for. Give an example use of a normal distribution and how to interpret it in the context of your example (this would be the start of the running example for the rest of the lesson based on the dataset you found or simulated as described above).
+
+Our dataset is modified from ChickWeight (https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ChickWeight) from R. We want to determine if protein-rich feed (assuming all chicks in dataset were fed protein-rich feed) makes a significant difference in the end weight of the chick from the expected weight of a chick given non-protein-rich food. 
+
+The expected weight of a chick after 3 weeks (21 days) is 190 grams (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart). We want to know if protein rich feed increases the 3 week weight of the chicken by at least 10%. 
+
+Therefore we will consider the new diet to be successful if the chicks from our dataset have a greater than 80% probability of having an average weight of 209 grams or higher after 3 weeks (21 days) of being fed a high protein diet. 
+
+```{r}
+data %>%
+  select(BaselineWeight, EndWeight) %>%
+  tbl_summary(type = everything() ~ "continuous2",
+              statistic = list("EndWeight" ~ c(
+      "{mean}, ({sd})",
+      "{median} ({p25}, {p75})",
+      "{min}, {max}"), "BaselineWeight" ~ c("{mean}, ({sd})"))
+    ) %>%
+  modify_caption("**Table 1. Data Summary**") %>%
+  modify_footnote(everything() ~ "Weight in grams")
+
+
+```
+As we can see from the table above, the baseline weight is comparable for all groups. 
+
+# Normal Prior
+**Discuss how the normal distribution can be used to describe information about the target parameter prior to conducting a study. After explaining this in general, then relate it to the specific example you are using in this lesson. **
+
+
+# Normal Likelihood
+**Explain what a likelihood function is in general and show the equation for the normal likelihood, explaining each part of the function in plain English. Show the likelihood for your example data. Include a plot of the likelihood function and explain how to interpret it in plain English.**
+
+**Show how the likelihood function is derived. Go slowly (don't do too many steps of the algebra simultaneously) and explain each step you're taking. In particular, make sure to add in the bit that your textbook skips in Equation 5.13.**
+
+# Normal-Normal Posterior
+
+## Balance of Prior Information and New Data
+**Design a graphical illustration of how prior information and new data are weighted differently in the normal-normal model.**
+
+From our prior research (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart), the mean bodyweight in grams for layer poultry (chickens that will be used for egg production) at three weeks is typically around 190 grams, so we are using that for our mean for our prior. 
+
+For the standard deviation, we are using 47.5, which is 1/4th of the mean, so that it is not a very strong prior. 
+
+
+## Posterior Distribution for the Example
+Show the posterior distribution, using equations and plots, for your example data set. Report a 95% equal tailed credible interval. Also report a posterior probability that is clinically relevant based on your example.
+
+## Derivation of the Posterior Distribution 
+\textbf{EXTRA CREDIT: }Show the derivation of the posterior distribution for the normal-normal model. The textbook provides an example in Section 5.3.4. See if you can improve on the clarity of this illustration by showing each step in detail and explaining each step as you go. 
+
+# MCMC Simulation
+Use RStan to simulate the posterior distribution for your example. Overlay a plot of the actual posterior based on the conjugate model to show how close the MCMC simulation is to the real thing. Use the MCMC simulated posterior to estimate the same clinically relevant posterior probability that you estimated above. Explain what is different about how you are finding this posterior probability as compared to the method you used based on the conjugate family analysis. 
+
+```{r}
+library(rstan)
+# Define the Stan Model
+gp_model <- "
+data {
+  int<lower = 0> N;     // number of data points
+  real Y[N];         // observed data
+}
+parameters {
+  real mu;              // posterior mean
+  real<lower=0> sigma;  // posterior standard deviation
+}
+model {
+  mu ~ normal(190, 47.5);         // prior for mu
+  Y ~ normal(mu, sigma);     // vectorized likelihood
+}
+"
+
+# Simulate the posterior
+sim <- stan(model_code = gp_model, data = list(N = length(data$EndWeight), Y = data$EndWeight), chains = 4, iter = 5000*2)
+
+mcmc_trace(sim, pars = c("mu", "sigma"), size = 0.1)
+
+# Calculate posterior parameters based on conjugate model
+data_mean <- mean(data$EndWeight)
+data_var <- var(data$EndWeight)
+prior_mean <- 190
+prior_var <- 47.5^2
+likelihood_var <- 72
+
+posterior_mean <- (prior_var * data_mean + likelihood_var * prior_mean) / (prior_var + likelihood_var)
+posterior_var <- (prior_var * likelihood_var) / (prior_var + likelihood_var)
+
+# Extract posterior parameters from MCMC simulation
+posterior_samples <- extract(sim)
+posterior_mu <- posterior_samples$mu
+posterior_sigma <- posterior_samples$sigma
+
+# Overlay histogram of simulated posterior with conjugate posterior
+hist(posterior_mu, freq = FALSE, main = "Simulated Posterior Distribution for mu", xlab = "mu", col = "skyblue")
+curve(dnorm(x, mean = posterior_mean, sd = sqrt(posterior_var)), add = TRUE, col = "red", lwd = 2)
+
+# Clinically relevant posterior probability estimation using simulated posterior
+estimated_prob <- sum(posterior_mu > 209) / length(posterior_mu)
+print(paste("Estimated probability of mu > 209 using MCMC simulated posterior:", round(estimated_prob, digits = 2)))
+
+
+```
+
+The difference between using the MCMC simulation and the conjugate family analysis is that the MCMC simulation uses repeated sampling to provide a numerical approximation of the posterior distribution, while the conjugate family analysis allows us to actually solve for the posterior distribution. MCMC simulations are especially useful when we are using complex models where solving mathematically for the posterior is not useful.  
