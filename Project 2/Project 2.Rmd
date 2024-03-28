@@ -10,10 +10,19 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
-
-# libraries
-library(dplyr)
+library(tidyverse)
+library(janitor)
+library(HDInterval)
+library(rstan)
+library(rstanarm)
+library(bayesplot)
+library(ggpubr)
+library(flextable)
+library(ggplot2)
+library(dpl)
+source("./bayesSim.R")
+set.seed(2648)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Safety Monitoring Rule
@@ -28,12 +37,12 @@ The parameter we try to estimate for the safety monitoring rule is the proabilit
 
 The beta-binomial model is a functional family of a prior (beta distribution) and likelihood (binomial distribution) function. These are multiplied together at a range of values of $\theta$ to generate our posterior distribution, from which we can estimate the probability that $\theta > \theta_{mcid}$
 
+
 ### Prior
 The prior distribution represents our knowledge of the adverse event rate before conducting the study. We use a $Beta(1,1)$ prior, which contains no information about the parameter, to represent our lack of informaton about the event rate.
 
 ### Likelihood
 The likelihood function represents the chance of observing the number of events seen in the trial, given a proposed risk level. We define this mathematically using a $Binomial(N_{events}, N_{total}, \theta)$ distribution. This provides an empirical estimate of the event rate parameter.
-
 
 ### Posterior Distribution
 We define the posterior distribution as the product of the prior and the likelihood of our data:
@@ -52,37 +61,144 @@ df_post <- data.frame(Events = 0:50) %>%
   mutate(`Posterior Probability` = f_post(Events))
 ```
 
-
-\newpage 
+\newpage
 
 # Operating Characteristics of the Efficacy Analysis
 
 ## Objective
-Describe in your own words what the objective of the efficacy analysis is.
+*Describe in your own words what the objective of the efficacy analysis is.*
+
+The objective of the efficacy analysis is to determine if the continuous abstinance from smoking across the last 4 weeks of the study is sufficient to conclude that the QUITNOW device has enough benefit to be worth further study. 
+
 
 ## Parameter to Estimate and Hypothesis
-Describe the parameter to be estimated in the efficacy analysis, the minimum clinically relevant value for the parameter, and the hypothesis to be tested. What are the success criteria for the efficacy analysis?
+*Describe the parameter to be estimated in the efficacy analysis, the minimum clinically relevant value for the parameter, and the hypothesis to be tested. What are the success criteria for the efficacy analysis?*
+
+The parameter to be estimated in the efficacy analysis is the proportion of participants who quit smoking cigarettes at week 27. The minimal clinically relevant value is 12.4% (𝜃 > .124), and the hypothesis is that the abstinence rate will be greater than 12.4%. The quantitative success criterion is that 𝑃(𝜃 > .124) > 0.8, or that there is an 80% probability of the true quit rate being greater than 12.4%. 
+
+
 
 ## Statistical Model
-Show the statistical model for the analysis, including prior, likelihood and posterior distribution. State these mathematically and in plain English as they relate to the objectives of the study. Note, there are 3 priors discussed in the protocol: one used for the primary analysis and two used for sensitivity analyses, the "optimistic" and "pessimisic" priors. Discuss why these priors are labeled as optimistic or pessimistic and what impact you think they might have on the posterior distribution. 
+*Show the statistical model for the analysis, including prior, likelihood and posterior distribution. State these mathematically and in plain English as they relate to the objectives of the study. Note, there are 3 priors discussed in the protocol: one used for the primary analysis and two used for sensitivity analyses, the "optimistic" and "pessimisic" priors. Discuss why these priors are labeled as optimistic or pessimistic and what impact you think they might have on the posterior distribution.*
+
+**Priors**
+Primary analysis: Beta(1,1)
+Optimistic: Beta(6,9)
+Pessimistic: Beta(4, 28)
+
+**Likelihoods**
+Primary analysis: 
+Optimistic: 
+Pessimistic: 
+
+**Posteriors**
+
+Primary analysis: 
+Optimistic: 
+Pessimistic: 
+
+The reason for having optimistic and pessimistic priors is that we do not actually know if the QUITNOW device will perform more similarly to e-cigarettes in previous trials (optimistic) or placebo in previous trials (pessimistic). 
+
+Because we do not have prior data on the QUITNOW device, we are using a non-informative beta(1,1) prior for our main analysis, however the prior does have some weight and therefore has the potential to give us a different posterior distribution for the same data than if we assume that the QUITNOW device will perform more similarly to either the e-cigarettes or placebo.
+
+We will be performing a sensitivity analysis using the optimistic and pessimistic priors to determine if the three resulting posteriors allow us to draw the same final conclusion (for example, that the QUITNOW device is effective). If so, we can be more confident in our results. If the three results do not agree, we may be less sure of the validity of our results. 
 
 ## Definition of Power and Type I Error in the Context of the Efficacy Analysis
-Any stochastic rule for success or failure could lead to an incorrect conclusion. How are the possibilities for drawing an incorrect conclusion represented in the Bayesian framework for this trial? Explain this plan English. 
+*Any stochastic rule for success or failure could lead to an incorrect conclusion. How are the possibilities for drawing an incorrect conclusion represented in the Bayesian framework for this trial? Explain this plan English.*
+
+The type I error rate and power in bayesian analysis are determined using repeated simulations of $X = \frac{1}{N} \sum_{i=1}^N I (Pr\{𝜃> 0.124\} > 0.8)$ different plausible 𝜃 values for the QUITNOW device. When 𝜃 > 0.124, X is the statistical power, or the proportion of simulations wherein the success criterion was met correctly and when 𝜃 < 0.123, X is the type I error rate, or the proportion of simulations where the success criterion was met falsly. 
+
+In plain english: the power, or probability of correctly determining that the success criterion was met, and type I error rate, the probability of incorrectly determining that the success criterion was met, in bayesian analysis are determined using repeated simulations of the success criterion with each simulation taking a value of 1 when the success criteria is met and 0 when it is not met. In these simulations, values of 𝜃 both above and below the clinical threshold of 0.124 are used, with each having different meanings. When 𝜃 > 0.124, we are determining the probability of concluding success when the success criterion is correctly met, and when 𝜃 < 0.124, we are determining the probability of concluding success when the success criterion is not correctly met. 
 
 ## Design of Your Program to Evaluate the Operating Characteristics of the Efficacy Analysis
+
+For the program, we are using N = 10,000 simulations, with each simulated study consisting of 50 participants, like the actual study will. 
 
 ### Inputs 
 Describe the input that goes into the program.
 
+The inputs into the program are as follows: 
+```{r echo = FALSE}
+t = data.frame(Input = c("N", "SampleSize", "Theta.test (vector)", "Alpha.prior", "Beta.prior", "Theta.success"), 
+               Description = c("Number of Simulations", "Number of participants in simulated study", "A vector containing a range of possible 𝜃 values.", "A vector containing the alpha values of the priors", "A vector containing the beta values of the priors", "The success criterion"), 
+               Value = c("10,000", 50, "Varies: 0<𝜃<1 ", "1, 6, 4", 
+                         "1, 9, 28", 0.124) )
+
+flextable(t)
+```
+
+
 ### Outputs
 Describe what the program creates as a final result.
+
+The program will output a table, with columns as described in the tbale below. 
+
+```{r echo = FALSE}
+t2 = data.frame(Output = c("Theta.test", "Result", "Value"), 
+               Description = c("The value of theta being simulated", "Whether the type of result displayed is power or type I error", "The value of the simulated power/type I error"))
+
+flextable(t)
+```
 
 ### Algorithm
 Describe how the program operates to produce output from the input. You can use words or draw a diagram, or both.
 
+The program works as follows:
+
+For each value of theta in theta test: 
+  1. Use rbinom() with N, SampleSize and theta to get a vector of N simulated Y values where Y is the number of simulated successes.
+  2. Use get_beta_post() (a self-made function included in bayesSim.R) to get the posterior alpha and beta using each of the primary, optimistic and pessimistic priors and the simulated Y values
+  3. Calculate the probability of (𝜃 > 0.124) for each posterior
+  4. Using those values, if the probability is > 0.8, store 1 (success) for that trial and if not store 0 for that trial
+  5. Calculate the proportion of successes for the given value of theta
+  
+Return table containing theta values and proportion of successes for each value of theta.
+  
+After all simulations have run, $X = \frac{1}{N} \sum_{i=1}^N I (Pr\{𝜃> 0.124\} > 0.8)$ is calculated for each value of𝜃, with the value of the indicator function being the value in the success column. For each theta, the value of X is stored in a dataframe along with the value of theta and whether the value of X is a power calculation or a type I error calculation. 
+
+
 ## Program Code
 
-Show your program code here.
+*Show your program code here.*
+
+```{r}
+qn.sim = function(N = 10000, SampleSize = 50, Theta.test = seq(0.01, 0.99, 0.01), Alpha.prior = c(1, 6, 4), Beta.prior = c(1, 9, 28), Theta.success = 0.124){
+  simdat = data.frame(y = rep(NA, N))
+  result = data.frame(theta = Theta.test)
+  i = 1
+  for(theta in Theta.test){
+    simdat$y = rbinom(N, SampleSize, theta)
+    post.prim= get_beta_post(Alpha.prior[1], Beta.prior[1], simdat$y, SampleSize)
+    post.opt = get_beta_post(Alpha.prior[2], Beta.prior[2], simdat$y, SampleSize)
+    post.pes = get_beta_post(Alpha.prior[3], Beta.prior[3], simdat$y, SampleSize)
+    simdat$criterion.prim = pbeta(0.124, post.prim$alpha.post, post.prim$beta.post, lower.tail = FALSE)
+    simdat$criterion.opt = pbeta(0.124, post.opt$alpha.post, post.opt$beta.post, lower.tail = FALSE)
+    simdat$criterion.pes = pbeta(0.124, post.pes$alpha.post, post.pes$beta.post, lower.tail = FALSE)
+    simdat = simdat %>%
+      mutate(success.prim = ifelse(simdat$criterion.prim > 0.8, 1, 0),
+             success.opt = ifelse(simdat$criterion.opt > 0.8, 1, 0),
+             success.pes = ifelse(simdat$criterion.pes > 0.8, 1, 0)
+             )
+    result[i,"Primary"] = 1/N * sum(simdat$success.prim)
+    result[i,"Optimisitc"] = 1/N * sum(simdat$success.opt)
+    result[i,"Pessimistic"] = 1/N * sum(simdat$success.pes)
+     
+    #print(simdat)
+    i = i + 1
+  }
+  
+  return(result)
+}
+```
+
 
 ## Comparison of Program Output to the Results in the Study Protocol
 Create two tables--one for Type I error and one for Power--that compare your results with those shown in the protocol so you can verify that your program produces the correct results.
+
+```{r, tbl.cap = "Bayesian Power"}
+qn.sim(N=10000, SampleSize = 50, Theta.test = c(0.375, 0.1875)) %>% flextable()
+```
+
+```{r, tbl.cap = "Bayesian Type I Error"}
+qn.sim(N=10000, SampleSize = 50, Theta.test = c(0.025, 0.05, 0.075, 0.10, 0.124)) %>% flextable()
+```
