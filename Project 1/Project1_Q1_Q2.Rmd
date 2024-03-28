@@ -16,7 +16,7 @@ subtitle: Introduction to Applied Bayesian Data Anlaysis
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-source("C:/Users/dvait/Desktop/GitRepos/BayesProject/BayesianProjects/bayesSim.R", echo=FALSE)
+source(here::here("bayesSim.R"), echo=FALSE)
 library(flextable)
 library(tidyverse)
 library(ggplot2)
