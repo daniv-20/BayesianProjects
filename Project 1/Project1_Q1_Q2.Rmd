@@ -87,3 +87,12 @@ flextable(tbl2) %>%
 *b)	Based on the table above, what is the largest number of responses that would result in triggering the futility rule?*
 
 Based on the table above, the largest number of responses that triggers the futility rule is 9. 
+
+\newpage
+
+*3. Write a paragraph of text that could be included the study protocol that describes the toxicity
+monitoring rule and the futility rule for the above trial. Limit your paragraph to no more than 5-7
+sentences.*
+
+A Bayesian decision rule was used to determine both dose-limiting toxicity (DLT) and futility. Beginning with a non-informative Beta-distributed prior, the posterior likelihood of the total number of events (either DLT or patient response) was calculated. In the first phase of the study, the trial was stopped if there was a greater than 80% posterior probability that the DLT rate was greater than 25%. In the second phase, the trial was stopped if there was a greater than 80% posterior probability that the success rate was under 55% after 20 patients had been treated.
+
