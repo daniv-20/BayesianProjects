@@ -1,7 +1,7 @@
 ---
 title: "Project 4 Template"
 subtitle: "Bayesian Analysis of Question 4 from the Master's Proficiency Exam"
-author: "Jesse Troy, PhD"
+author: "Sam Albertson, Suz Angermeier, and Dani Vaithalingam"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   pdf_document:
