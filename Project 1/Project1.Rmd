@@ -1,6 +1,6 @@
 ---
-title: "Project 1: q1,2"
-author: "Danielle Vaithilingam"
+title: "Project 1"
+author: "Danielle Vaithilingam, Suz Angermeier, and Sam Albertson"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   pdf_document:
@@ -96,3 +96,92 @@ sentences.*
 
 A Bayesian decision rule was used to determine both dose-limiting toxicity (DLT) and futility. Beginning with a non-informative Beta-distributed prior, the posterior likelihood of the total number of events (either DLT or patient response) was calculated. In the first phase of the study, the trial was stopped if there was a greater than 80% posterior probability that the DLT rate was greater than 25%. In the second phase, the trial was stopped if there was a greater than 80% posterior probability that the success rate was under 55% after 20 patients had been treated.
 
+\newpage
+
+*4. Revisit your futility rule in question 2. This time, instead of assuming a Beta(1,1) prior try tuning a
+prior for the analysis based on the following results from a hypothetical series of Phase I trials of the
+same drug where the response rate was evaluated.*
+
+*a. Explain the steps you took to tune your prior based on this data.*
+
+```{r}
+#Tuning the new priors with the study 1-5
+#a.post = a.prior+y
+#b.post = b.prior+n-y
+#inital A & B
+aini=1
+bini=1
+#Study 1 calculation
+a1=aini+55
+b1=bini+100-55
+#Study 2 calculation
+a2=a1+65
+b2=b1+100-65
+#Study 3 calculation
+a3=a2+72
+b3=b2+100-72
+#Study 4 calculation
+a4=a3+56
+b4=b3+100-56
+#Study 5 calculation
+a5=a4+68
+b5=b4+100-68
+## flat prior
+a0 = a5
+b0 = b5
+N_total = 20
+responses = 20 - c(0:20) 
+obs.prob = responses / 20
+sim = bayes_sim(alpha.prior = a5, beta.prior = b5, N_total = N_total, events = responses, theta_target = 0.55)
+posterior.prob = sim$`Pr[theta <= theta_target]`
+## events = dlts
+## N-total = num patient treated
+#bayes_sim(alpha.prior = 1, beta.prior = 1, N_total = 20, events = 0:20, theta_target = 0.25)
+
+tbl4 = data.frame(n.resp = responses, post = posterior.prob, obs = obs.prob) %>%
+  mutate(fut = ifelse(post > .80, "yes", "no"))
+
+table4 = flextable(tbl2) %>%
+  colformat_double(j = c(2), digits = 3) %>%
+  set_header_labels(n.resp = "Number of Responses Observed", post = "Posterior Probability of Suboptimal Response \n < 55%", obs = "Observed Response Probability", fut = "Treatment is Futile?")
+```
+
+In order to tune the prior we used each of the studies in order to calculate the new posterior, that new posterior was then used for the prior for the next study. Once we completed the calculations up to the fifth study, the final posterior is the prior for our study. The very first prior that we used were Beta(1,1) because it is a non-informative prior so we will be able to build our posterior off this prior. 
+
+
+*b. State the hyperparameters of your selected prior and explain what information is contained in
+these hyperparameters.*
+
+The hyperparameters of our selected prior is Beta(`r {round(a5,3)}`, `r {round(b5,3)}`).  
+
+
+*c. Make a plot of the prior and explain what you see in non-technical language. Your answer
+should be framed in terms of the possible values for the response to treatment.*
+
+```{r}
+p=seq(0,1,length=10000)
+plot(p, dbeta(p,a5,b5), type = 'l',ylab="Density",main="Beta Distribution (317,185)", col="purple", xlab="Probability of Response")
+```
+
+In this above graph we can see with the hyperparameters that probability that there is a response to treatment. With our current hyperparameters tuned from 5 previous studies we have the probability that an individual responses to treatment falls between about 0.6 and 0.7.  
+
+
+*d. State the mean and 95% credible interval for the prior and interpret these values.*
+
+```{r}
+mean <- a5/(a5+b5)
+var <- (a5*b5)/(((a5+b5)^2)*(a5+b5+1))
+sd <- sqrt(var)
+se <- sd/sqrt(100)
+lowerci <- mean-(1.96*se)
+upperci <- mean+(1.96*se)
+```
+
+
+On average a patient response to the treatment about `r {round(mean*100,3)}`% of the time. Then we a 95% confidence interval, we are 95% confidence that the true mean proportion of patients who response to treatment falls between `r {round(lowerci,3)}` and `r {round(upperci,3)}`.  
+
+
+*e. Is there any information about your posterior distribution that you know just by looking at this
+prior?*
+
+The prior can give us some insight into what the posterior probability might look like when new data is added to the distribution. In this case we can see that our prior is above 0.5, additionally the CI is fairly tight. This suggests that any additional data added to the distribution would not move the distribution in any extreme direction. I predict that the distribution would remain simplier with either increasing our decreasing the spread slightly.  
