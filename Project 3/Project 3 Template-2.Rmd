@@ -39,14 +39,14 @@ colnames(data) = c("Chick", "BaselineWeight", "EndWeight")
 ```
 
 # Background
-This template uses a similar format as the course notes for this class. In fact, you should imagine that you are designing a lesson to teach the normal-normal conjugate model as you complete this template. Any good lesson needs an example data set to illustrate the concepts. Feel free to use something from a project you've been working on (be careful not to use data without permission!), find a dataset online, or create a fictitious example and simulate the data for the example. 
+*This template uses a similar format as the course notes for this class. In fact, you should imagine that you are designing a lesson to teach the normal-normal conjugate model as you complete this template. Any good lesson needs an example data set to illustrate the concepts. Feel free to use something from a project you've been working on (be careful not to use data without permission!), find a dataset online, or create a fictitious example and simulate the data for the example. *
 
-In this section you should give some brief background on the kinds of problems that the normal-normal model is appropriate for, what the target of inference is, and briefly introduce the example you are going to use. 
-
-# Normal PDF
-Imagine you are explaining the normal distribution to someone who has never heard of it. Include all the basics such as the equation for the PDF, the mean, median, mode, variance, etc. as well as a plain language description of what kinds of problems normal distributions are good models for. Give an example use of a normal distribution and how to interpret it in the context of your example (this would be the start of the running example for the rest of the lesson based on the dataset you found or simulated as described above).
+*In this section you should give some brief background on the kinds of problems that the normal-normal model is appropriate for, what the target of inference is, and briefly introduce the example you are going to use.* 
 
 Our dataset is modified from ChickWeight (https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ChickWeight) from R. We want to determine if protein-rich feed (assuming all chicks in dataset were fed protein-rich feed) makes a significant difference in the end weight of the chick from the expected weight of a chick given non-protein-rich food. 
+
+# Normal PDF
+*Imagine you are explaining the normal distribution to someone who has never heard of it. Include all the basics such as the equation for the PDF, the mean, median, mode, variance, etc. as well as a plain language description of what kinds of problems normal distributions are good models for. Give an example use of a normal distribution and how to interpret it in the context of your example (this would be the start of the running example for the rest of the lesson based on the dataset you found or simulated as described above).*
 
 The expected weight of a chick after 3 weeks (21 days) is 190 grams (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart). We want to know if protein rich feed increases the 3 week weight of the chicken by at least 10%. 
 
