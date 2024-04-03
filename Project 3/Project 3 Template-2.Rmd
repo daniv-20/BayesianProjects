@@ -43,6 +43,8 @@ colnames(data) = c("Chick", "BaselineWeight", "EndWeight")
 
 *In this section you should give some brief background on the kinds of problems that the normal-normal model is appropriate for, what the target of inference is, and briefly introduce the example you are going to use.* 
 
+The normal-normal family of Bayesian models uses a Gaussian distribution to represent both the prior and likelihood functions. This family is well-suited to modeling continuous data, particularly where there are no upper or lower bounds on the values the data or parameter can take on.
+
 Our dataset is modified from ChickWeight (https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ChickWeight) from R. We want to determine if protein-rich feed (assuming all chicks in dataset were fed protein-rich feed) makes a significant difference in the end weight of the chick from the expected weight of a chick given non-protein-rich food. 
 
 # Normal PDF
