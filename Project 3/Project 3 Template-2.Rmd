@@ -43,12 +43,54 @@ colnames(data) = c("Chick", "BaselineWeight", "EndWeight")
 
 *In this section you should give some brief background on the kinds of problems that the normal-normal model is appropriate for, what the target of inference is, and briefly introduce the example you are going to use.* 
 
-The normal-normal family of Bayesian models uses a Gaussian distribution to represent both the prior and likelihood functions. This family is well-suited to modeling continuous data, particularly where there are no upper or lower bounds on the values the data or parameter can take on.
+The normal-normal family of Bayesian models uses a Gaussian distribution to represent both the prior and likelihood functions. This family is well-suited to modeling continuous data, particularly where there are no upper or lower bounds on the values the data or parameter can take on. 
 
 Our dataset is modified from ChickWeight (https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ChickWeight) from R. We want to determine if protein-rich feed (assuming all chicks in dataset were fed protein-rich feed) makes a significant difference in the end weight of the chick from the expected weight of a chick given non-protein-rich food. 
 
 # Normal PDF
 *Imagine you are explaining the normal distribution to someone who has never heard of it. Include all the basics such as the equation for the PDF, the mean, median, mode, variance, etc. as well as a plain language description of what kinds of problems normal distributions are good models for. Give an example use of a normal distribution and how to interpret it in the context of your example (this would be the start of the running example for the rest of the lesson based on the dataset you found or simulated as described above).*
+
+The normal distribution is the most common distribution used in statistical modeling. In cases where we know the mean and typical variance in our data, and where we expect the data we sample to be symmetrically distributed on either side of the mean, many different random processes result in a normal sampling distribution. The symmetry is convenient, because if we can specify the mean of the distribution, we know that will also be equivalent to both the median and the mode. Also convenient is the fact that the mean and variance are defined independently of each other, allowing us to freely adjust the shape and location of our distribution as needed.
+
+Given a mean $\mu$ and variance $\sigma^2$ (or a standard deviation of $\sigma$), we can specify the PDF as:
+
+$pdf(x; \mu, \sigma^2) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2}(\frac{x - \mu}{\sigma})^2}$
+
+We can shorthand this notationally for a normally-distributed random variable $Y \sim N(\mu, \sigma^2)$. 
+
+Normal distributions are useful for modeling the distribution of data which is continuous, unbounded, and symmetrically distributed around its mean, which leads to it being used to represent most continuous variables in statistics. For example, in our ChickWeight dataset, the final weights of our chicks are normally-distributed, with a mean of `r signif(mean(subset(ChickWeight, Time == 21)$weight), 3)` and a standard deviation of `r signif(sd(subset(ChickWeight, Time == 21)$weight), 3)`:
+
+```{r}
+hist(subset(ChickWeight, Time == 21)$weight, main = "Distribution of Chick Weights", xlab = "Weight at Time = 21")
+```
+
+# Normal Prior
+**Discuss how the normal distribution can be used to describe information about the target parameter prior to conducting a study. After explaining this in general, then relate it to the specific example you are using in this lesson. **
+
+In our example, we are interested in finding the mean weight $\mu$ of the chicks in our dataset via a Bayesian analysis. Before we can estimate this with our dataset, we need to define a prior to represent the state of our existing knowledge. This prior will be defined using the normal distribution, which means we need to specify both our expected mean and our standard deviation. 
+
+From our prior research (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart), the mean bodyweight for layer poultry (chickens that will be used for egg production) is typically around 190 grams at three weeks old. The variance of the distribution shows the confidence we have in our prior - higher variance means we are less confident and $\mu$ could reasonably cover a larger range of values, while a smaller variance means we are more confident in our estimate. For this example, we use 47.5 grams as our standard deviation. Because this is 1/4th of the mean, it is not a very strong prior, and our data will strongly influence our posterior estimate of $\mu$.
+
+
+# Normal Likelihood
+**Explain what a likelihood function is in general and show the equation for the normal likelihood, explaining each part of the function in plain English. Show the likelihood for your example data. Include a plot of the likelihood function and explain how to interpret it in plain English.**
+
+**Show how the likelihood function is derived. Go slowly (don't do too many steps of the algebra simultaneously) and explain each step you're taking. In particular, make sure to add in the bit that your textbook skips in Equation 5.13.**
+
+# Normal-Normal Posterior
+
+## Balance of Prior Information and New Data
+**Design a graphical illustration of how prior information and new data are weighted differently in the normal-normal model.**
+
+## Posterior Distribution for the Example
+*Show the posterior distribution, using equations and plots, for your example data set. Report a 95% equal tailed credible interval. Also report a posterior probability that is clinically relevant based on your example.*
+
+## Derivation of the Posterior Distribution 
+*\textbf{EXTRA CREDIT: }Show the derivation of the posterior distribution for the normal-normal model. The textbook provides an example in Section 5.3.4. See if you can improve on the clarity of this illustration by showing each step in detail and explaining each step as you go. *
+
+# MCMC Simulation
+*Use RStan to simulate the posterior distribution for your example. Overlay a plot of the actual posterior based on the conjugate model to show how close the MCMC simulation is to the real thing. Use the MCMC simulated posterior to estimate the same clinically relevant posterior probability that you estimated above. Explain what is different about how you are finding this posterior probability as compared to the method you used based on the conjugate family analysis.*
+
 
 The expected weight of a chick after 3 weeks (21 days) is 190 grams (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart). We want to know if protein rich feed increases the 3 week weight of the chicken by at least 10%. 
 
@@ -69,34 +111,6 @@ data %>%
 
 ```
 As we can see from the table above, the baseline weight is comparable for all groups. 
-
-# Normal Prior
-**Discuss how the normal distribution can be used to describe information about the target parameter prior to conducting a study. After explaining this in general, then relate it to the specific example you are using in this lesson. **
-
-
-# Normal Likelihood
-**Explain what a likelihood function is in general and show the equation for the normal likelihood, explaining each part of the function in plain English. Show the likelihood for your example data. Include a plot of the likelihood function and explain how to interpret it in plain English.**
-
-**Show how the likelihood function is derived. Go slowly (don't do too many steps of the algebra simultaneously) and explain each step you're taking. In particular, make sure to add in the bit that your textbook skips in Equation 5.13.**
-
-# Normal-Normal Posterior
-
-## Balance of Prior Information and New Data
-**Design a graphical illustration of how prior information and new data are weighted differently in the normal-normal model.**
-
-From our prior research (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart), the mean bodyweight in grams for layer poultry (chickens that will be used for egg production) at three weeks is typically around 190 grams, so we are using that for our mean for our prior. 
-
-For the standard deviation, we are using 47.5, which is 1/4th of the mean, so that it is not a very strong prior. 
-
-
-## Posterior Distribution for the Example
-Show the posterior distribution, using equations and plots, for your example data set. Report a 95% equal tailed credible interval. Also report a posterior probability that is clinically relevant based on your example.
-
-## Derivation of the Posterior Distribution 
-\textbf{EXTRA CREDIT: }Show the derivation of the posterior distribution for the normal-normal model. The textbook provides an example in Section 5.3.4. See if you can improve on the clarity of this illustration by showing each step in detail and explaining each step as you go. 
-
-# MCMC Simulation
-Use RStan to simulate the posterior distribution for your example. Overlay a plot of the actual posterior based on the conjugate model to show how close the MCMC simulation is to the real thing. Use the MCMC simulated posterior to estimate the same clinically relevant posterior probability that you estimated above. Explain what is different about how you are finding this posterior probability as compared to the method you used based on the conjugate family analysis. 
 
 ```{r}
 library(rstan)
