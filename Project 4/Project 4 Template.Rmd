@@ -4,22 +4,34 @@ subtitle: "Bayesian Analysis of Question 4 from the Master's Proficiency Exam"
 author: "Sam Albertson, Suz Angermeier, and Dani Vaithalingam"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
+  html_document:
+    toc: true
+    toc_depth: '3'
+    df_print: paged
   pdf_document:
     number_sections: true
     toc: true
     toc_depth: 3
+subtitle: Bayesian Analysis of Question 4 from the Master's Proficiency Exam
 urlcolor: blue
-header-includes:
-  - \usepackage{xcolor}
+header-includes: \usepackage{xcolor}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(rstanarm)
+library(tidyverse)
+path = here::here("Project 1/bayesSim.R"); path
+source(path)
+ost = read.csv("osteo.csv")%>%
+  mutate(fracture.b = ifelse(fracture=="Yes", 1, 0), 
+         priorfrac.b = ifelse(priorfrac == "Yes", 1, 0))
+  
 ```
 
 # Background
 
-The enclosed dataset called OSTEO.CSV includes the results of a prospective cohort study that followed 500 women age 55 or older for 1 year after diagnosis with osteoporosis. The primary outcome of the study was bone fracture (yes/no) within the 1st year of osteoporosis diagnosis. The investigators hypothesized that women who had a history of bone fractures prior to their osteoporosis diagnosis would be at higher risk of having an osteoporosis-related fracture than those who had no such prior history. A potentially important prognostic variable was age at diagnosis of osteoporosis, which was recorded in years. You have already done a frequentist analysis of this dataset. Now, you will analyze the same dataset using a Bayesian logistic regression model. You will complete the analysis by answering the following questions.
+The enclosed dataset called OSTEO.CSV includes the results of a prospective cohort study that followed 500 women age 55 or older for 1 year after diagnosis with osteoporosis. The primary outcome of the study was bone fracture (yes/no) within the 1st year of osteoporosis diagnosis. The investigators hypothesized that women who had a history of bone fractures prior to their osteoporosis diagnosis would be at higher risk of having an osteoporosis-related fracture than those who had no such prior history. **A potentially important prognostic variable was age at diagnosis of osteoporosis, which was recorded in years**. You have already done a frequentist analysis of this dataset. Now, you will analyze the same dataset using a Bayesian logistic regression model. You will complete the analysis by answering the following questions.
 
 # Question 1: Write the Bayesian Logistic Regression Model
 
@@ -27,9 +39,22 @@ Write a simple Bayesian logistic regression model for fracture at 1 year post-di
 
 ## Write the data model
 
-Write the data model here.
+$Y_i|\beta_0, \beta_1 \sim Bernoulli(\pi_i)$, where $Y_i$ is a random variable denoting whether participant i has bone fracture and $\pi_i$ is the probability of bone fracture for participant i. 
+
+$\pi_i = \frac{e^{\beta_0 + \beta_1 X_{i1}}}{1+e^{\beta_0 + \beta_1 X_{i1}}}$
+
+In words, the value of the random variable $Y_i$, given the values of $\beta_0$ and $\beta_1$, comes from a Bernoulli distribution with probability $\pi_i$, where $\pi_i$ is a function of the parameters $\beta_1$ and $\beta_0$ and $X_{i1}$, which is an indicator variable for whether the participant in question had a prior history of fractures. 
+
+$ln[\frac{\pi_i}{1 - \pi_i}] = \beta_0 + \beta_1  X_{i1}$
 
 ## Write the model for the prior
+
+$\beta_0 \sim N (\mu_{\beta_0}, \sigma_{\beta_0}^2)$
+$\beta_1 \sim N (\mu_{\beta_1}, \sigma_{\beta_1}^2)$
+
+In words, the intercept parameter $\beta_0$, which is the log-odds of fracture in women with no prior fracture, has a normally distributed prior centered at some mean with some standard deviation, both of which will be specified in the next section. 
+
+The slope parameter $\beta_1$ represents the increase in log-odds of fracture in women with prior fracture compared to women without a prior fracture history and this parameter also has a normally distributed prior. 
 
 Specify "vague" normal prior distributions for the parameters in your data model as follows. 
 
@@ -37,14 +62,36 @@ Specify "vague" normal prior distributions for the parameters in your data model
 
 First, assume your prior information says that 20% of women will have fractures at 1 year when they don't have a prior history of fracture. Your level of uncertainty about this is quite high. A prior that has a 95% credible interval ranging from about 12% to 31% would capture your uncertainty well. What are the parameters of a normally distributed prior for $\beta_0$ that express this uncertainty?
 
+We want $\mu_{\beta_0}$ such that $\frac{e^{\mu_{\beta_0}}}{1+e^{\mu_{\beta_0}}}$ = 0.20. 
+
+If we solve for $\mu_{\beta_0}$, we get $\mu_{\beta_0}$ = -1.3863
+
+Then, given the 95% credible interval, $\text{logit}(0.12)$ to $\text{logit}(0.31)$, we get the log odds CI bounds as $log(0.12/0.88)$ = -1.957 and $log(0.31/0.69)$ = -0.787. We can then use these to calculate the standard deviation $\sigma^2_{\mu_{\beta_0}}$.
+
+The width of the interval (from -1.957 to -0.787) is approximately $-0.787 - (-1.957) = 1.17$.
+
+Therefore 1.96 * $\sigma_{\mu_{\beta_0}}$ = 1.17 and $\sigma_{\mu_{\beta_0}}$ = 0.597. 
+
+$\beta_0 \sim N (\mu_{\beta_0} = -1.386, \sigma_{\beta_0}^2 = 0.597^2)$
+
 ### Prior for Beta1
 
 Assume that you have prior information that suggests a history of fractures is expected to increase the probability of fracture by 10% over not having a prior history (i.e., a 30% probability of fracture at 1 year in women who have a prior history of fracture vs. 20% probability in women without a prior history). But your prior information is highly uncertain. In fact, it seems plausible that women with a prior history of fracture may have as little as a 10% probability of fracture at 1 year (the same risk in women without a prior history!) or as high as a 62% risk of fracture at 1 year (a very large increase in risk over women without a prior history). Based on this information, specify a normally distributed prior for $\beta_1$ on the log-odds scale and write an interpretation of the mean and 95% credible interval with respect the clinical problem (i.e., whether a prior history promotes or reduces the risk of fracture at 1 year).
 
 State the mean and 95% credible interval for the $\beta_1$ prior on the odds ratio scale and write an interpretation.
 
-# Question 2: Simulation of the Priors
+First, we convert the given probabilities to log-odds. The log-odds of fracture for not having a prior history are $log(0.20/0.80) = -1.386$ and with a prior history are $log(0.30/0.70) = -0.847$. 
 
+The mean of the prior is the difference in log odds of fracture between having a prior history and not having a prior history, $\mu_{\beta_1} = -0.847 - (-1.386) = 0.539$. 
+
+To get the standard deviation of the prior, we use the 95% credible interval that ranges from a 10% probability (log odds $\approx -2.197$) to a 62% probability (log odds $\approx 0.465$). The width of this interval is approximately $0.465 - (-2.197) = 2.662$. For a 95% credible interval (±1.96 standard deviations for a normal distribution), we calculate the standard deviation ($\sigma$): 1.96 x $\sigma$ = 2.662 -> $\sigma = \frac{2.662}{1.96} = 1.359$
+
+$\beta_1 \sim N (\mu_{\beta_1} = 0.539, \sigma_{\beta_1}^2 = 1.359^2)$
+
+The prior mean suggests that having a prior history of fracture is associated with a $\beta_1 = 0.539$ (-2.123, 3.201) increase in the log odds of fracture at 1 year compared to not having a prior history of fracture. 
+
+# Question 2: Simulation of the Priors
+ 
 Simulate the priors for your model. Plot the theoretical priors as well as the MCMC simulated priors and verify the simulations are correct. State the mean, median, and 95% credible intervals for your priors and write interpretations for these. 
 
 HINT: Follow the instructions in the stan_glm() help pages and use a model without an intercept. Include a term for no prior history of fracture instead of the intercept: 
@@ -52,19 +99,117 @@ HINT: Follow the instructions in the stan_glm() help pages and use a model witho
 "If you prefer to specify a prior on the intercept without the predictors being auto-centered, then you have to omit the intercept from the formula and include a column of ones as a predictor, in which case some element of [prior] specifies the prior on it, rather than [prior_intercept]."
 
 More information is [here](https://mc-stan.org/rstanarm/articles/priors.html).
+$$\beta_0 \sim N (\mu_{\beta_0} = -1.386, \sigma_{\beta_0}^2 = 0.597^2)$$
+$$\beta_1 \sim N (\mu_{\beta_1} = 0.539, \sigma_{\beta_1}^2 = 1.359^2)$$
 
+
+```{r}
+
+library(rstanarm)
+library(bayesplot)
+library(tidyverse)
+library(tidybayes)
+library(broom.mixed)
+
+sd0 = 0.597^2; sd0
+sd1 = 1.359^2; sd1
+
+mod = stan_glm(fracture.b ~ priorfrac.b, 
+               data = ost, 
+               family = binomial,
+               prior_intercept = normal(-1.386, sd0, autoscale = TRUE), 
+               prior = normal(0.539,sd1, autoscale = TRUE), 
+               chains = 4, 
+               iter = 5000*2, 
+               seed = 1345, 
+               prior_PD = TRUE)
+
+prior_summary(mod)
+
+samples = as.matrix(mod)
+summary(samples)
+mean.b1 = mean(samples[, "priorfrac.b"])
+median.b1 = median(samples[, "priorfrac.b"])
+cred.int = hdi(samples[, "priorfrac.b"])
+
+
+
+```
+The mean of $\beta_1$, `r signif(mean.b1, 2)`, is the average expected increase in log odds of fracture associated with having a prior history of fracture compared to not having prior history. The median, `r signif(median.b1, 2)` is the center value of the distribution of $\beta_1$. The 95% credible interval `r signif(cred.int[1], 2)` to `r signif(cred.int[2], 2)` 
 
 # Question 3: Update your prior belief using the OSTEO data
 
 Now, use the OSTEO data set to update your priors. Plot the posterior distribution for the change in log-odds of fracture at 1 year associated with a prior history of fracture. Interpret the median and 95% highest posterior density credible interval with respect to the research question about whether prior history of fracture is a risk factor for fracture at 1 year after diagnosis with osteoporosis. Repeat these steps on the odds ratio scale. 
 
+```{r}
+mod.post = update(mod, prior_PD = FALSE)
+
+print(mod.post, digits= 3)
+
+mcmc.chain = as.matrix(mod.post)
+ci = hdi(mcmc.chain[, "priorfrac.b"]); ci
+med = median(mcmc.chain[, "priorfrac.b"]); med
+
+ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b"])); ci.exp
+med.exp = median(exp(mcmc.chain[,"priorfrac.b"]), na.rm = TRUE); med.exp
+mcmc_dens(mod.post, pars = c("priorfrac.b")) + geom_vline(xintercept = med, color = "black") + geom_vline(xintercept = ci[1], color = "green3") + geom_vline(xintercept = ci[2], color = "green3") + ggtitle("Log Odds Scale")
+
+mcd = as.data.frame(mcmc.chain)
+
+ggplot(data = mcd) + geom_density(aes(x = exp(priorfrac.b)), fill = "blue", alpha = 0.25) + geom_vline(xintercept = med.exp, color = "black") + geom_vline(xintercept = ci.exp[1], color = "green3") + geom_vline(xintercept = ci.exp[2], color = "green3") + ggtitle("Odds Scale")
+
+```
+
+On the log odds scale, the median is `r signif(med, 2)`, as shown in black on the plot above, with a 95% credible interval of `r signif(ci[1], 2)` to `r signif(ci[2], 2)`. In words, the log odds ratio of fracture for participants with prior fracture compared to those without is approximately `r signif(med, 2)` [95% Credible interval: `r signif(ci[1], 2)` to `r signif(ci[2], 2)`]. 
+
+On the odds scale, the median is `r signif(med.exp, 2)`, as shown in black on the plot above, with a 95% credible interval of `r signif(ci.exp[1], 2)` to `r signif(ci.exp[2], 2)`. In words the odds ratio of fracture for participants with prior fracture compared to those without is approximately `r signif(med.exp, 2)` [95% Credible interval: `r signif(ci.exp[1], 2)` to `r signif(ci.exp[2], 2)`].  
+
+
 What is the posterior probability that the odds ratio is greater than 1? What does this imply about the risk of fracture at 1 in women with vs. without a prior history of fracture?
+
+```{r}
+sum(ifelse(mcmc.chain[, "priorfrac.b"] > 0, 1, 0)) / length(mcmc.chain[,"priorfrac.b"]) ## odds ratio 0 = log odds ratio of 1
+```
+
+The posterior probability that the odds ratio is greater than 1 is: approximately 1.0. 
+
+This implies that history of prior fracture is positively associated with the probability of fracture. 
 
 What is the posterior probability that the odds ratio is greater than 2?
 
+```{r}
+sum(ifelse(mcmc.chain[, "priorfrac.b"] > log(2), 1, 0)) / length(mcmc.chain[,"priorfrac.b"]) ## odds ratio 0 = log odds ratio of 1
+```
+The posterior probability that the odds ratio is greater than 2 is 0.96. 
+
 What is the value of the odds ratio at which the posterior probability exceeds 80%?
 
-Based on the above posterior probabilities, write a summary sentence that describes the strength of the evidence you now that that a prior history of fracture is a risk factor for fracture 1 year after diagnosis with osteoporosis.
+```{r}
+post.prob = 0
+i = 0
+ORs = seq(10, 2, by = -0.1)
+while(post.prob < 0.8){
+  OR = ORs[i]
+  post.prob = sum(ifelse(mcmc.chain[, "priorfrac.b"] > log(OR), 1, 0)) / length(mcmc.chain[,"priorfrac.b"])
+  i = i + 1
+}
+cat("OR = ", OR, "post.prob =", post.prob)
+
+post.prob = 0
+i = 0
+ORs = seq(3, 2, by = -0.001)
+while(post.prob < 0.8){
+  OR = ORs[i]
+  post.prob = sum(ifelse(mcmc.chain[, "priorfrac.b"] > log(OR), 1, 0)) / length(mcmc.chain[,"priorfrac.b"])
+  i = i + 1
+}
+cat("OR = ", OR, "post.prob =", post.prob)
+```
+The highest value of the odds ratio for which the posterior probability exceeds 80% is 2.427. 
+
+Based on the above posterior probabilities, write a summary sentence that describes the strength of the evidence you know that that a prior history of fracture is a risk factor for fracture 1 year after diagnosis with osteoporosis.
+
+Based on the above posterior probabilities, we have very strong evidence that the prior history of fracture is a risk factor for fracture 1 year after diagnosis with osteoporosis as the posterior probability of the odds ratio being greater than 1 is approximately 100%. Additionally, there is a greater than 80% probability that the odds ratio is greater than 2.427. 
 
 # Question 4: Including Age in the Model
 
