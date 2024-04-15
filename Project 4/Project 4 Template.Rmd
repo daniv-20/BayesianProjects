@@ -12,7 +12,6 @@ output:
     number_sections: true
     toc: true
     toc_depth: 3
-subtitle: Bayesian Analysis of Question 4 from the Master's Proficiency Exam
 urlcolor: blue
 header-includes: \usepackage{xcolor}
 ---
@@ -21,7 +20,7 @@ header-includes: \usepackage{xcolor}
 knitr::opts_chunk$set(echo = TRUE)
 library(rstanarm)
 library(tidyverse)
-path = here::here("Project 1/bayesSim.R"); path
+path = here::here("bayesSim.R")
 source(path)
 ost = read.csv("osteo.csv")%>%
   mutate(fracture.b = ifelse(fracture=="Yes", 1, 0), 
