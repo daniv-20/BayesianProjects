@@ -22,7 +22,7 @@ library(rstanarm)
 library(tidyverse)
 path = here::here("bayesSim.R")
 source(path)
-ost = read.csv("osteo.csv")%>%
+ost = read.csv(here::here("Project 4", "osteo.csv")) %>%
   mutate(fracture.b = ifelse(fracture=="Yes", 1, 0), 
          priorfrac.b = ifelse(priorfrac == "Yes", 1, 0))
   
