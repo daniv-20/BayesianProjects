@@ -386,6 +386,7 @@ prop = function(x){mean(x==1)}
 pp_check(mod.post, nreps = 100, plotfun = "stat", "stat" ="prop" ) + xlab("Probability of fracture")
 ```
 
+* How does a posterior predictive check work?
 
 # Question 8: Identifying Women at High Risk of Fracture
 
@@ -395,34 +396,31 @@ Suppose that in clinical practice an intervention would be warranted in women wh
 ```{r}
 library(bayesrules)
 cs = classification_summary(model = mod.post, data = ost, cutoff = 0.4)
-cs
+
 ## to get the positive predictive value...
 
-sensitivity = cs$accuracy_rates[1,1];sensitivity
-specificity = cs$accuracy_rates[2,1]; specificity
-overall_accuracy = cs$accuracy_rates[3,1]; overall_accuracy
+sensitivity = cs$accuracy_rates[1,1]
+specificity = cs$accuracy_rates[2,1]
+overall_accuracy = cs$accuracy_rates[3,1]
 
-prevalence = mean(pred_data$priorfrac.b == 1); prevalence
+prevalence = mean(pred_data$priorfrac.b == 1)
 
 ## calculate positive predictive value (PPV) using Bayes' theorem
-ppv = sensitivity * prevalence / (sensitivity * prevalence + (1 - specificity) * (1 - prevalence)); ppv
-
-cat("The positive predictive value from Bayes' theorem is", signif(ppv, 2))
+ppv = sensitivity * prevalence / (sensitivity * prevalence + (1 - specificity) * (1 - prevalence))
 ```
+The PPV, the probability that a woman with an over 40% chance of fracture will actually have a fracture, is `r signif(ppv*100,3)`%. The sensitivity, the probability that a woman who ends up getting a fracture will have over a 40% assessed risk of fracture, is `r signif(sensitivity*100,3)`%. The specificity, the probability that a woman who does not end up having a fracture has an assessed risk of under 40%, is `r signif(specificity*100,3)`%. The overall accuracy, our chance of correctly classifying a woman as being at risk of fracture or not, is `r signif(overall_accuracy*100,3)`%.
+
+
 Then, use cross validation to evaluate the future performance of the model. Again, state the sensitivity, specificity, overall accuracy, and positive predictive value and interpret each of these.
 
 ```{r}
 cscv = classification_summary_cv(model = mod.post, data = ost, cutoff = 0.4, k = 5)
 
-cscv$cv
-
-cat("The sensitivity is: ", signif(cscv$cv$sensitivity, 2), "\nThe specificity is: ", signif(cscv$cv$specificity,2), "\nThe overal accuracy is:",  signif(cscv$cv$overall_accuracy,2))
-
 sensitivity = cscv$cv$sensitivity
 specificity = cscv$cv$specificity
+overall_accuracy = cscv$cv$overall_accuracy
 
-ppv = sensitivity * prevalence / (sensitivity * prevalence + (1 - specificity) * (1 - prevalence)); ppv
-
-cat("The ppv is:", signif(ppv, 2))
+ppv = sensitivity * prevalence / (sensitivity * prevalence + (1 - specificity) * (1 - prevalence))
 ```
 
+Under cross-validation, the PPV, the probability that a woman with an over 40% chance of fracture will actually have a fracture, is `r signif(ppv*100,3)`%. The sensitivity, the probability that a woman who ends up getting a fracture will have over a 40% assessed risk of fracture, is `r signif(sensitivity*100,3)`%. The specificity, the probability that a woman who does not end up having a fracture has an assessed risk of under 40%, is `r signif(specificity*100,3)`%. The overall accuracy, our chance of correctly classifying a woman as being at risk of fracture or not, is `r signif(overall_accuracy*100,3)`%.
