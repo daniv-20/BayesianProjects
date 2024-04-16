@@ -231,17 +231,12 @@ Suppose now that you want to include age in the model since you already know age
 Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates. Write the priors that rstanarm has identified. 
 
 ```{r}
-sd0 = 0.597^2; sd0
-sd1 = 1.359^2; sd1
-
-## chose 0 and 1 for age b/c why not
-betaPriors = normal(location = c(0.539, 0), scale = c(sd1, 1))
 
 mod = stan_glm(fracture.b ~ priorfrac.b + age, 
                data = ost, 
                family = binomial,
-               prior_intercept = normal(-1.386, sd0, autoscale = TRUE), 
-               prior = betaPriors, 
+               prior_intercept = normal(0, 2.5, autoscale = TRUE), 
+               prior = normal(0, 2.5, autoscale = TRUE), 
                chains = 4, 
                iter = 5000*2, 
                seed = 1345, 
@@ -296,20 +291,14 @@ $ln[\frac{\pi_i}{1 - \pi_i}] = \beta_0 + \beta_1  X_{i1} + \beta_2 Age_{i1} + \b
 Where $ln[\frac{\pi_i}{1 - \pi_i}]$ represents the log-odds of bone fracture in a given patient compared to non-osteoperosis patients at birth. $\beta_0$ is the log-odds in the reference group, while $\beta_1$ is the increase in risk associated with an osteoperosis diagnosis, and $beta_2$ is the increase associated with a one year increase in age (each holding the other variable steady). The $beta_3$ coefficient is the increase in $beta_2$ given a patient has a prior history of fracture. 
 
 ## Prior Distributions for the Regression Parameters
-Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates, as well as the interaction between these two factors. Write the priors that rstanarm has identified.
+Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates, as well as the interaction between these two factors. Write the priors that rstanarm has identified. **Use adjsuted priors from output -> will be 2.5 * 1 / sd(age)**
 
 ```{r}
-sd0 = 0.597^2
-sd1 = 1.359^2
-
-
-betaPriors = normal(location = c(0.539, 0, 0), scale = c(sd1, 1, 1))
-
 mod = stan_glm(fracture.b ~ priorfrac.b * age, 
                data = ost, 
                family = binomial,
-               prior_intercept = normal(-1.386, sd0, autoscale = TRUE), 
-               prior = betaPriors, 
+               prior_intercept = normal(0, 2.5, autoscale = TRUE), 
+               prior = normal(0, 2.5, autoscale = TRUE), 
                chains = 4, 
                iter = 5000*2, 
                seed = 1345, 
@@ -344,9 +333,12 @@ ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b:age"]))
 med.exp = median(exp(mcmc.chain[,"priorfrac.b:age"]), na.rm = TRUE)
 mcmc_dens(mod.post, pars = c("priorfrac.b:age")) + geom_vline(xintercept = med, color = "black") + geom_vline(xintercept = ci[1], color = "green3") + geom_vline(xintercept = ci[2], color = "green3") + ggtitle("Log Odds Scale")
 
-mcd = as.data.frame(mcmc.chain)
 
-ggplot(data = mcd) + geom_density(aes(x = exp(priorfrac.b)), fill = "blue", alpha = 0.25) + geom_vline(xintercept = med.exp, color = "black") + geom_vline(xintercept = ci.exp[1], color = "green3") + geom_vline(xintercept = ci.exp[2], color = "green3") + ggtitle("Odds Scale")
+## WE DON'T NEED ODDS SCALE PLOT
+
+# mcd = as.data.frame(mcmc.chain)
+# 
+# ggplot(data = mcd) + geom_density(aes(x = exp(priorfrac.b)), fill = "blue", alpha = 0.25) + geom_vline(xintercept = med.exp, color = "black") + geom_vline(xintercept = ci.exp[1], color = "green3") + geom_vline(xintercept = ci.exp[2], color = "green3") + ggtitle("Odds Scale")
 
 ```
 
@@ -359,12 +351,78 @@ Most of the confidence interval is one one side of zero, so we can say that ther
 
 Make a plot that shows the posterior predicted probability of fracture at 1 year post-diagnosis with osteoporosis by age at diagnosis (55 to 80 years, in increments of 5 years) and prior history of fracture. HINT: Your plot should show the age at diagnosis on the X-axis and the posterior predicted probability on the Y axis. There should be two lines on the plot: one for women without a prior history of fracture and another for women who have a prior history of fracture.
 
+```{r}
+library(sjPlot)
+age_grid = seq(55, 80, by = 5)
+               
+# Create data frame for predictions
+pred_data <- expand.grid(age = age_grid, priorfrac.b = c(0, 1))
+
+# Predict posterior probabilities of fracture for each age and prior history
+pred_probs <- predict(mod.post, newdata = pred_data, type = "response", 
+                      allow_new_levels = TRUE, re.form = NA)
+
+# Add predicted probabilities to pred_data
+pred_data$predicted_probability <- pred_probs
+
+# Plot posterior predicted probabilities
+ggplot(pred_data, aes(x = age, y = predicted_probability, color = factor(priorfrac.b))) +
+  geom_line(size = 1) +
+  labs(title = "Posterior Predicted Probability of Fracture at 1 Year Post-Diagnosis",
+       x = "Age at Diagnosis", y = "Predicted Probability of Fracture") +
+  scale_color_manual(values = c("blue", "red"), labels = c("No Prior Fracture", "Prior Fracture")) +
+  theme_minimal()
+
+```
+
+
 # Question 7: Posterior Predictive Check
 
 Perform a posterior predictive check examining how consistent the model is with the original data. Use 100 datasets. Explain how this posterior predictive check works and what you conclude from the results.
+
+```{r}
+set.seed(1234)
+prop = function(x){mean(x==1)}
+pp_check(mod.post, nreps = 100, plotfun = "stat", "stat" ="prop" ) + xlab("Probability of fracture")
+```
+
 
 # Question 8: Identifying Women at High Risk of Fracture
 
 Suppose that in clinical practice an intervention would be warranted in women who have a posterior predicted probability of fracture at 1 year that exceeds 40%. First, use this cutoff for predicting a woman is at high risk to evaluate the model based on the data you have. State the sensitivity, specificity, overall accuracy, and positive predictive value and interpret each of these in light of the clinical problem of identifying women eligible for an intervention to prevent fracture within 1 year of diagnosis with osteoporosis. HINT: rstanarm doesn't give you the positive predictive value by default but you can use Bayes' theorem to find positive predictive value based on sensitivity, specificity and prevalence.
 
+
+```{r}
+library(bayesrules)
+cs = classification_summary(model = mod.post, data = ost, cutoff = 0.4)
+cs
+## to get the positive predictive value...
+
+sensitivity = cs$accuracy_rates[1,1];sensitivity
+specificity = cs$accuracy_rates[2,1]; specificity
+overall_accuracy = cs$accuracy_rates[3,1]; overall_accuracy
+
+prevalence = mean(pred_data$priorfrac.b == 1); prevalence
+
+## calculate positive predictive value (PPV) using Bayes' theorem
+ppv = sensitivity * prevalence / (sensitivity * prevalence + (1 - specificity) * (1 - prevalence)); ppv
+
+cat("The positive predictive value from Bayes' theorem is", signif(ppv, 2))
+```
 Then, use cross validation to evaluate the future performance of the model. Again, state the sensitivity, specificity, overall accuracy, and positive predictive value and interpret each of these.
+
+```{r}
+cscv = classification_summary_cv(model = mod.post, data = ost, cutoff = 0.4, k = 5)
+
+cscv$cv
+
+cat("The sensitivity is: ", signif(cscv$cv$sensitivity, 2), "\nThe specificity is: ", signif(cscv$cv$specificity,2), "\nThe overal accuracy is:",  signif(cscv$cv$overall_accuracy,2))
+
+sensitivity = cscv$cv$sensitivity
+specificity = cscv$cv$specificity
+
+ppv = sensitivity * prevalence / (sensitivity * prevalence + (1 - specificity) * (1 - prevalence)); ppv
+
+cat("The ppv is:", signif(ppv, 2))
+```
+
