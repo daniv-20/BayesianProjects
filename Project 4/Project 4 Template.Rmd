@@ -239,6 +239,13 @@ Now update the priors with the data in the OSTEO dataset. Plot the posterior dis
 ## Write the Data Model
 Write the data model. Use a similar format to what you used to write the data model in question 1. In your notation, use $\beta_0$, $\beta_1$, and $\beta_2$ as the intercept, prior history of fracture, and age respectively and explain what each parameter means. Remember, rstanarm gives model results without centering (even though the prior for the intercept is based on the other predictors being centered; see the next question).  
 
+
+The data model including the interaction term is as follows:
+
+$ln[\frac{\pi_i}{1 - \pi_i}] = \beta_0 + \beta_1  X_{i1} + \beta_2 Age_{i1} + \beta_3 Age_{i1} X_{i1}$
+
+Where $ln[\frac{\pi_i}{1 - \pi_i}]$ represents the log-odds of bone fracture in a given patient compared to non-osteoperosis patients at birth. $\beta_0$ is the log-odds in the reference group, while $\beta_1$ is the increase in risk associated with an osteoperosis diagnosis, and $beta_2$ is the increase associated with a one year increase in age (each holding the other variable steady). The $beta_3$ coefficient is the increase in $beta_2$ given a patient has a prior history of fracture. 
+
 ## Prior Distributions for the Regression Parameters
 Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates, as well as the interaction between these two factors. Write the priors that rstanarm has identified.
 
