@@ -17,7 +17,7 @@ header-includes: \usepackage{xcolor}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE)
 library(rstanarm)
 library(tidyverse)
 path = here::here("bayesSim.R")
@@ -102,7 +102,7 @@ $$\beta_0 \sim N (\mu_{\beta_0} = -1.386, \sigma_{\beta_0}^2 = 0.597^2)$$
 $$\beta_1 \sim N (\mu_{\beta_1} = 0.539, \sigma_{\beta_1}^2 = 1.359^2)$$
 
 
-```{r}
+```{r, include=F}
 
 library(rstanarm)
 library(bayesplot)
@@ -140,7 +140,7 @@ The mean of $\beta_1$, `r signif(mean.b1, 2)`, is the average expected increase 
 
 Now, use the OSTEO data set to update your priors. Plot the posterior distribution for the change in log-odds of fracture at 1 year associated with a prior history of fracture. Interpret the median and 95% highest posterior density credible interval with respect to the research question about whether prior history of fracture is a risk factor for fracture at 1 year after diagnosis with osteoporosis. Repeat these steps on the odds ratio scale. 
 
-```{r}
+```{r, include=F}
 mod.post = update(mod, prior_PD = FALSE)
 
 print(mod.post, digits= 3)
@@ -214,7 +214,13 @@ Based on the above posterior probabilities, we have very strong evidence that th
 
 ## Writing the Data Model
 
-Write the data model when the interaction term is included. Use a similar format to what you used to write the data model in question 1. In your notation, use $\beta_0$, $\beta_1$, and $\beta_2$ as the intercept, prior history of fracture, and age respectively and explain what each parameter means. Remember, rstanarm gives model results without centering (even though the prior for the intercept is based on the other predictors being centered; see the next question).  
+Write the data model when the age term is included. Use a similar format to what you used to write the data model in question 1. In your notation, use $\beta_0$, $\beta_1$, and $\beta_2$ as the intercept, prior history of fracture, and age respectively and explain what each parameter means. Remember, rstanarm gives model results without centering (even though the prior for the intercept is based on the other predictors being centered; see the next question).  
+
+The data model including the age term is as follows:
+
+$ln[\frac{\pi_i}{1 - \pi_i}] = \beta_0 + \beta_1  X_{i1} + \beta_2 Age_{i1}$
+
+Where $ln[\frac{\pi_i}{1 - \pi_i}]$ represents the log-odds of bone fracture in a given patient compared to non-osteoperosis patients at birth. $\beta_0$ is the log-odds in the reference group, while $\beta_1$ is the increase in risk associated with an osteoperosis diagnosis, and $beta_2$ is the increase associated with a one year increase in age. 
 
 ## Prior Distributions for the Regression Parameters
 
