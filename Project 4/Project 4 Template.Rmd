@@ -230,9 +230,57 @@ Suppose now that you want to include age in the model since you already know age
 
 Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates. Write the priors that rstanarm has identified. 
 
+```{r}
+sd0 = 0.597^2; sd0
+sd1 = 1.359^2; sd1
+
+## chose 0 and 1 for age b/c why not
+betaPriors = normal(location = c(0.539, 0), scale = c(sd1, 1))
+
+mod = stan_glm(fracture.b ~ priorfrac.b + age, 
+               data = ost, 
+               family = binomial,
+               prior_intercept = normal(-1.386, sd0, autoscale = TRUE), 
+               prior = betaPriors, 
+               chains = 4, 
+               iter = 5000*2, 
+               seed = 1345, 
+               prior_PD = TRUE)
+
+prior_summary(mod)
+
+samples = as.matrix(mod)
+summary(samples)
+mean.b1 = mean(samples[, "priorfrac.b"])
+median.b1 = median(samples[, "priorfrac.b"])
+cred.int = hdi(samples[, "priorfrac.b"])
+
+
+```
+
+
 ## Posterior
 
 Now update the priors with the data in the OSTEO dataset. Plot the posterior distribution for prior history of fracture and state the median and 95% highest posterior density credible interval on the odds ratio scale. What has happened to the posterior distribution for $\beta_1$ now that age is included in the model (as compared to the first model you ran without age)? Is this consistent with what you expected would happen? Why or why not?
+
+```{r}
+mod.post = update(mod, prior_PD = FALSE)
+
+print(mod.post, digits= 3)
+
+mcmc.chain = as.matrix(mod.post)
+ci = hdi(mcmc.chain[, "priorfrac.b"]); ci
+med = median(mcmc.chain[, "priorfrac.b"]); med
+
+ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b"])); ci.exp
+med.exp = median(exp(mcmc.chain[,"priorfrac.b"]), na.rm = TRUE); med.exp
+mcmc_dens(mod.post, pars = c("priorfrac.b")) + geom_vline(xintercept = med, color = "black") + geom_vline(xintercept = ci[1], color = "green3") + geom_vline(xintercept = ci[2], color = "green3") + ggtitle("Log Odds Scale")
+
+mcd = as.data.frame(mcmc.chain)
+
+ggplot(data = mcd) + geom_density(aes(x = exp(priorfrac.b)), fill = "blue", alpha = 0.25) + geom_vline(xintercept = med.exp, color = "black") + geom_vline(xintercept = ci.exp[1], color = "green3") + geom_vline(xintercept = ci.exp[2], color = "green3") + ggtitle("Odds Scale")
+```
+
 
 # Question 5: Evaluating Interaction Between Age and a Prior History of Fracture
 
@@ -242,9 +290,56 @@ Write the data model. Use a similar format to what you used to write the data mo
 ## Prior Distributions for the Regression Parameters
 Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates, as well as the interaction between these two factors. Write the priors that rstanarm has identified.
 
+```{r}
+sd0 = 0.597^2; sd0
+sd1 = 1.359^2; sd1
+
+
+betaPriors = normal(location = c(0.539, 0, 0), scale = c(sd1, 1, 1))
+
+mod = stan_glm(fracture.b ~ priorfrac.b * age, 
+               data = ost, 
+               family = binomial,
+               prior_intercept = normal(-1.386, sd0, autoscale = TRUE), 
+               prior = betaPriors, 
+               chains = 4, 
+               iter = 5000*2, 
+               seed = 1345, 
+               prior_PD = TRUE)
+
+prior_summary(mod)
+
+samples = as.matrix(mod)
+summary(samples)
+mean.b1 = mean(samples[, "priorfrac.b"])
+median.b1 = median(samples[, "priorfrac.b"])
+cred.int = hdi(samples[, "priorfrac.b"])
+```
+
+
 ## Posterior
 
 Now update the priors with the data in the OSTEO dataset. Plot the posterior distribution for the interaction term and interpret the median and 95% highest posterior density credible interval. What impact does older age have on the relationship between fracture risk in those with and without prior history?
+
+```{r}
+mod.post = update(mod, prior_PD = FALSE)
+
+print(mod.post, digits= 3)
+
+mcmc.chain = as.matrix(mod.post)
+ci = hdi(mcmc.chain[, "priorfrac.b:age"]); ci
+med = median(mcmc.chain[, "priorfrac.b:age"]); med
+
+ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b:age"])); ci.exp
+med.exp = median(exp(mcmc.chain[,"priorfrac.b:age"]), na.rm = TRUE); med.exp
+mcmc_dens(mod.post, pars = c("priorfrac.b:age")) + geom_vline(xintercept = med, color = "black") + geom_vline(xintercept = ci[1], color = "green3") + geom_vline(xintercept = ci[2], color = "green3") + ggtitle("Log Odds Scale")
+
+mcd = as.data.frame(mcmc.chain)
+
+ggplot(data = mcd) + geom_density(aes(x = exp(priorfrac.b)), fill = "blue", alpha = 0.25) + geom_vline(xintercept = med.exp, color = "black") + geom_vline(xintercept = ci.exp[1], color = "green3") + geom_vline(xintercept = ci.exp[2], color = "green3") + ggtitle("Odds Scale")
+
+```
+
 
 Write a single sentence that summarizes the strength of evidence you have that age interacts with prior history of fracture to increase the risk of fracture 1 year after diagnosis with osteoporosis?
 
