@@ -4,10 +4,6 @@ subtitle: "Bayesian Analysis of Question 4 from the Master's Proficiency Exam"
 author: "Sam Albertson, Suz Angermeier, and Dani Vaithalingam"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
-  html_document:
-    toc: true
-    toc_depth: '3'
-    df_print: paged
   pdf_document:
     number_sections: true
     toc: true
@@ -386,7 +382,7 @@ prop = function(x){mean(x==1)}
 pp_check(mod.post, nreps = 100, plotfun = "stat", "stat" ="prop" ) + xlab("Probability of fracture")
 ```
 
-* How does a posterior predictive check work?
+The posterior predictive check attempts to use our Bayesian model of the outcome to predict the outcome rate in our dataset via simulation. Because the observed fracture rate is roughly the median of the distribution of simulated fracture rates, we can conclude that our model is well-specified.
 
 # Question 8: Identifying Women at High Risk of Fracture
 
