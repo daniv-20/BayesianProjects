@@ -269,17 +269,18 @@ mod.post = update(mod, prior_PD = FALSE)
 print(mod.post, digits= 3)
 
 mcmc.chain = as.matrix(mod.post)
-ci = hdi(mcmc.chain[, "priorfrac.b"]); ci
-med = median(mcmc.chain[, "priorfrac.b"]); med
+ci = hdi(mcmc.chain[, "priorfrac.b"])
+med = median(mcmc.chain[, "priorfrac.b"])
 
-ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b"])); ci.exp
-med.exp = median(exp(mcmc.chain[,"priorfrac.b"]), na.rm = TRUE); med.exp
+ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b"]))
+med.exp = median(exp(mcmc.chain[,"priorfrac.b"]), na.rm = TRUE)
 mcmc_dens(mod.post, pars = c("priorfrac.b")) + geom_vline(xintercept = med, color = "black") + geom_vline(xintercept = ci[1], color = "green3") + geom_vline(xintercept = ci[2], color = "green3") + ggtitle("Log Odds Scale")
 
 mcd = as.data.frame(mcmc.chain)
 
 ggplot(data = mcd) + geom_density(aes(x = exp(priorfrac.b)), fill = "blue", alpha = 0.25) + geom_vline(xintercept = med.exp, color = "black") + geom_vline(xintercept = ci.exp[1], color = "green3") + geom_vline(xintercept = ci.exp[2], color = "green3") + ggtitle("Odds Scale")
 ```
+The median of the age OR is `r signif(med.exp,3)` [95% CI: `r signif(ci.exp[1],3)` - `r signif(ci.exp[2],3)`]. With age included in the model, the distribution of the coefficient associated with previous fracture history has shifted much lower. This makes sense, because if age is a big risk factor for fracture, then it would create a causal connection between both previous and 1-year post-diagnosis fracture rates. Accounting for this would be expected to reduce the apparent impact of previous fracture as an effect independent of age. 
 
 
 # Question 5: Evaluating Interaction Between Age and a Prior History of Fracture
@@ -298,8 +299,8 @@ Where $ln[\frac{\pi_i}{1 - \pi_i}]$ represents the log-odds of bone fracture in 
 Create an MCMC simulation of weakly informative priors for a model that includes prior history of fracture and age as covariates, as well as the interaction between these two factors. Write the priors that rstanarm has identified.
 
 ```{r}
-sd0 = 0.597^2; sd0
-sd1 = 1.359^2; sd1
+sd0 = 0.597^2
+sd1 = 1.359^2
 
 
 betaPriors = normal(location = c(0.539, 0, 0), scale = c(sd1, 1, 1))
@@ -328,17 +329,19 @@ cred.int = hdi(samples[, "priorfrac.b"])
 
 Now update the priors with the data in the OSTEO dataset. Plot the posterior distribution for the interaction term and interpret the median and 95% highest posterior density credible interval. What impact does older age have on the relationship between fracture risk in those with and without prior history?
 
+Write a single sentence that summarizes the strength of evidence you have that age interacts with prior history of fracture to increase the risk of fracture 1 year after diagnosis with osteoporosis?
+
 ```{r}
 mod.post = update(mod, prior_PD = FALSE)
 
 print(mod.post, digits= 3)
 
 mcmc.chain = as.matrix(mod.post)
-ci = hdi(mcmc.chain[, "priorfrac.b:age"]); ci
-med = median(mcmc.chain[, "priorfrac.b:age"]); med
+ci = hdi(mcmc.chain[, "priorfrac.b:age"])
+med = median(mcmc.chain[, "priorfrac.b:age"])
 
-ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b:age"])); ci.exp
-med.exp = median(exp(mcmc.chain[,"priorfrac.b:age"]), na.rm = TRUE); med.exp
+ci.exp = hdi(exp(mcmc.chain[, "priorfrac.b:age"]))
+med.exp = median(exp(mcmc.chain[,"priorfrac.b:age"]), na.rm = TRUE)
 mcmc_dens(mod.post, pars = c("priorfrac.b:age")) + geom_vline(xintercept = med, color = "black") + geom_vline(xintercept = ci[1], color = "green3") + geom_vline(xintercept = ci[2], color = "green3") + ggtitle("Log Odds Scale")
 
 mcd = as.data.frame(mcmc.chain)
@@ -347,8 +350,10 @@ ggplot(data = mcd) + geom_density(aes(x = exp(priorfrac.b)), fill = "blue", alph
 
 ```
 
+The median of the interaction OR is `r signif(med.exp,3)` [95% CI: `r signif(ci.exp[1],3)` - `r signif(ci.exp[2],3)`]. With the interaction included in the model, the distribution of the coefficient associated with previous fracture history has not shifted significantly compared to the linear model with age involved. This makes sense, because if age does not have significant interaction with prior fracture history, then including the interaction term would not explain much of the residual variation and the priorfrac coefficient would not have to shift much.
 
-Write a single sentence that summarizes the strength of evidence you have that age interacts with prior history of fracture to increase the risk of fracture 1 year after diagnosis with osteoporosis?
+Most of the confidence interval is one one side of zero, so we can say that there is strong evidence of an interaction between age and prior history of fracture. 
+
 
 # Question 6: Predicting Fracture Risk Based on Prior History and Age
 
