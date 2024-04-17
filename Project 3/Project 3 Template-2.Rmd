@@ -211,10 +211,11 @@ The posterior distribution, shown in green, is the updated belief about $\mu$ af
 
 ### Interpretations
 
-* **Influence of prior vs likelihood: 
- * When the prior distribution (yellow) is wide or non-informative, like in this case, it indicates that we have a lot of uncertainty about $\mu$ before observing the data. In cases like these, the liklihood distribution, blue, plays a more dominant role in shaping the posterior distribution. 
- * If the prior were more narrow, the posterior would reflect more of a blend of the prior beliefs and the observed data. 
- * The size of the dataset also influences the balance between the prior and the likelihood. Larger datasets provide more information and make the liklihood distribution more influential in determining the posterior. 
+When the prior distribution (yellow) is wide or non-informative, like in this case, it indicates that we have a lot of uncertainty about $\mu$ before observing the data. In cases like these, the liklihood distribution, blue, plays a more dominant role in shaping the posterior distribution. 
+
+If the prior were more narrow, the posterior would reflect more of a blend of the prior beliefs and the observed data. 
+ 
+ The size of the dataset also influences the balance between the prior and the likelihood. Larger datasets provide more information and make the liklihood distribution more influential in determining the posterior. 
 
 ## Posterior Distribution for the Example
 *Show the posterior distribution, using equations and plots, for your example data set. Report a 95% equal tailed credible interval. Also report a posterior probability that is clinically relevant based on your example.*  
@@ -225,10 +226,11 @@ $$\mu|\vec{y} \sim N(\theta\frac{\sigma^2}{n\tau^2+\sigma^2}+\bar{y}\frac{n\tau^
 
 Thus for our data we have the equation equal to:  
 
-$$\mu|\vec{y} \sim N(190\frac{71.51027^2}{45(47.5^2)+71.51027^2}+218.6889\frac{45(47.5^2)}{45(47.5^2)+71.51027^2},\frac{47.5^2(71.51027^2)}{45(47.5^2)+71.51027^2}) \\ 
-\mu|\vec{y} \sim N(9.562797+208.2025, 108.1891) 
-\\ 
-\mu|\vec{y} \sim N(217.7653, 108.1891)$$  
+$$\mu|\vec{y} \sim N(190\frac{71.51027^2}{45(47.5^2)+71.51027^2}+218.6889\frac{45(47.5^2)}{45(47.5^2)+71.51027^2},\frac{47.5^2(71.51027^2)}{45(47.5^2)+71.51027^2}) $$
+
+$$\mu|\vec{y} \sim N(9.562797+208.2025, 108.1891) $$
+
+$$\mu|\vec{y} \sim N(217.7653, 108.1891)$$  
 
 ```{r}
 bayesrules::plot_normal_normal(mean = 190, sd = 47.5, sigma = 71.51027,
@@ -245,7 +247,7 @@ The expected weight of a chick after 3 weeks (21 days) is 190 grams (https://www
 
 Therefore we will consider the new diet to be successful if the chicks from our dataset have a greater than 80% probability of having an average weight of 209 grams or higher after 3 weeks (21 days) of being fed a high protein diet. 
 
-Now to understand if the new diet is successful we want to have an 80% probability of the end weight being 209 grams or above. Looking at our posterior distribution we have that 78.8% of our chicks have a weight of 209 grams or above. This means that the new diet is not clinically successful based on our predetermined metrics.
+Now to understand if the new diet is successful we want to have an 80% probability of the end weight being 209 grams or above. Looking at our posterior distribution we have that 78.8% of our chicks have a weight of 209 grams or above. The new diet does not quite meet that standard, but is very close to being considered successful.
 
 
 ## Derivation of the Posterior Distribution 
@@ -263,23 +265,22 @@ $$\propto exp[\frac{-\mu^2+2\mu\theta-\theta^2}{2\tau^2}+\frac{-\mu^2+2\mu\bar{y
 
 From here we can simplify this equation:  
 
-$$\propto exp[\frac{-\mu^2+2\mu\theta-\theta^2}{2\tau^2}-\frac{\mu^2}{2\sigma^2/n}+\frac{2\mu\bar{y}-\bar{y}^2}{2\sigma^2/n}]
-\\
-\propto exp[\frac{-\mu^2+2\mu\theta}{2\tau^2}-\frac{\theta^2}{2\tau^2}-\frac{\mu^2}{2\sigma^2/n}+\frac{2\mu\bar{y}}{2\sigma^2/n}-\frac{\bar{y}^2}{2\sigma^2/n}]
-\\
-\propto exp[\frac{-\mu^2+2\mu\theta}{2\tau^2}]exp[\frac{-\mu^2+2\mu\bar{y}}{2\sigma^2/n}]$$  
+$$\propto exp[\frac{-\mu^2+2\mu\theta-\theta^2}{2\tau^2}-\frac{\mu^2}{2\sigma^2/n}+\frac{2\mu\bar{y}-\bar{y}^2}{2\sigma^2/n}]$$
+$$\propto exp[\frac{-\mu^2+2\mu\theta}{2\tau^2}-\frac{\theta^2}{2\tau^2}-\frac{\mu^2}{2\sigma^2/n}+\frac{2\mu\bar{y}}{2\sigma^2/n}-\frac{\bar{y}^2}{2\sigma^2/n}]$$
+
+$$\propto exp[\frac{-\mu^2+2\mu\theta}{2\tau^2}]exp[\frac{-\mu^2+2\mu\bar{y}}{2\sigma^2/n}]$$  
 
 Now let us make sure that the there are common denominators so we can combine them into a single exponent:  
 
-$$\propto exp[\frac{(-\mu^2+2\mu\theta)\sigma^2/n}{2\tau^2\sigma^2/n}]exp[\frac{-\mu^2+2\mu\bar{y}-\bar{y}^2}{2\tau^2\sigma^2/n}]
-\\
-\propto exp[\frac{(-\mu^2+2\mu\theta)\sigma^2+(-\mu^2+2\mu\bar{y})n\tau^2}{2\tau^2\sigma^2}]$$  
+$$\propto exp[\frac{(-\mu^2+2\mu\theta)\sigma^2/n}{2\tau^2\sigma^2/n}]exp[\frac{-\mu^2+2\mu\bar{y}-\bar{y}^2}{2\tau^2\sigma^2/n}]$$
+
+$$\propto exp[\frac{(-\mu^2+2\mu\theta)\sigma^2+(-\mu^2+2\mu\bar{y})n\tau^2}{2\tau^2\sigma^2}]$$  
 
 Now we will combine like terms:
 
-$$\propto exp[\frac{-\mu^2(n\tau^2+\sigma^2)+2\mu(\theta\sigma^2+\bar{y}n\tau^2)}{2\tau^2\sigma^2}]
-\\
-\propto exp[\frac{-\mu^2+2\mu\frac{\theta\sigma^2+\bar{y}n\tau^2}{n\tau^2+\sigma^2}}{2(\tau^2\sigma^2)/(n\tau^2+\sigma^2)}]$$  
+$$\propto exp[\frac{-\mu^2(n\tau^2+\sigma^2)+2\mu(\theta\sigma^2+\bar{y}n\tau^2)}{2\tau^2\sigma^2}]$$
+
+$$\propto exp[\frac{-\mu^2+2\mu\frac{\theta\sigma^2+\bar{y}n\tau^2}{n\tau^2+\sigma^2}}{2(\tau^2\sigma^2)/(n\tau^2+\sigma^2)}]$$  
 
 Now we can bring back some constant which do not depend upon $\mu$ to complete the square in the numerator:  
 
@@ -332,6 +333,10 @@ sim <- stan(model_code = gp_model, data = list(N = length(data$EndWeight), Y = d
 
 mcmc_trace(sim, pars = c("mu", "sigma"), size = 0.1)
 
+mcmc_acf(sim, pars = c("mu", "sigma"))
+
+n_eff <- neff_ratio(sim, pars = c("mu", "sigma"))
+
 # Calculate posterior parameters based on conjugate model
 data_mean <- mean(data$EndWeight)
 data_var <- var(data$EndWeight)
@@ -358,9 +363,12 @@ print(paste("Estimated probability of mu > 209 using MCMC simulated posterior:",
 
 ```
 
+The effective sample size ratio of this simulation is `r signif(n_eff,3)`.
+
+
 The difference between using the MCMC simulation and the conjugate family analysis is that the MCMC simulation uses repeated sampling to provide a numerical approximation of the posterior distribution, while the conjugate family analysis allows us to actually solve for the posterior distribution. MCMC simulations are especially useful when we are using complex models where solving mathematically for the posterior is not useful.  
 
-#### Contributions
+#### Contributions  
 
 Sam: Background, Normal PDF, Normal Prior  
 
