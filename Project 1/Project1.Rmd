@@ -185,3 +185,10 @@ On average a patient response to the treatment about `r {round(mean*100,3)}`% of
 prior?*
 
 The prior can give us some insight into what the posterior probability might look like when new data is added to the distribution. In this case we can see that our prior is above 0.5, additionally the CI is fairly tight. This suggests that any additional data added to the distribution would not move the distribution in any extreme direction. I predict that the distribution would remain simplier with either increasing our decreasing the spread slightly.  
+
+
+#### Contributions
+
+* Sam: Questions 1 - 3
+* Suz: Question 4
+* Dani: Question 1 - 2
