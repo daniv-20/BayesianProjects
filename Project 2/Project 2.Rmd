@@ -19,7 +19,7 @@ library(bayesplot)
 library(ggpubr)
 library(flextable)
 library(ggplot2)
-library(dpl)
+library(dplyr)
 source(here::here("bayesSim.R"))
 set.seed(2648)
 knitr::opts_chunk$set(echo = TRUE)
@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 The goal of the safety monitoring rule is to set a trigger for determining when the rate of severe adverse events is too high. A maximum acceptable rate is pre-specified, and if we are confident that the probability exceeds this level, the study is discontinued. 
 
 ## Parameter to Estimate and Hypothesis
-The parameter we try to estimate for the safety monitoring rule is the proability $\theta$ that a patient will have an adverse event of Grade 3 (severe) or higher. We define our maximum clinically acceptable risk level as $\theta_{mcid}$ = 0.05; our safety monitoring rule is triggered if there is a greater than 80% chance that $\theta > \theta_{mcid}$. 
+The parameter we try to estimate for the safety monitoring rule is the probability $\theta$ that a patient will have an adverse event of Grade 3 (severe) or higher. We define our maximum clinically acceptable risk level as $\theta_{mcid}$ = 0.05; our safety monitoring rule is triggered if there is a greater than 80% chance that $\theta > \theta_{mcid}$. 
 
 ## Statistical Model
 
@@ -39,7 +39,7 @@ The beta-binomial model is a functional family of a prior (beta distribution) an
 
 
 ### Prior
-The prior distribution represents our knowledge of the adverse event rate before conducting the study. We use a $Beta(1,1)$ prior, which contains no information about the parameter, to represent our lack of informaton about the event rate.
+The prior distribution represents our knowledge of the adverse event rate before conducting the study. We use a $Beta(1,1)$ prior, which contains no information about the parameter, to represent our lack of information about the event rate.
 
 ### Likelihood
 The likelihood function represents the chance of observing the number of events seen in the trial, given a proposed risk level. We define this mathematically using a $Binomial(N_{events}, N_{total}, \theta)$ distribution. This provides an empirical estimate of the event rate parameter.
@@ -56,9 +56,11 @@ f_post <- function(x){
   pct <- signif(1 - pbeta(0.05, x + 1, 50 - x + 1), 3)
   return(paste0(pct, "%"))
 }
+f_post
 
 df_post <- data.frame(Events = 0:50) %>%
   mutate(`Posterior Probability` = f_post(Events))
+df_post
 ```
 
 \newpage
@@ -68,7 +70,7 @@ df_post <- data.frame(Events = 0:50) %>%
 ## Objective
 *Describe in your own words what the objective of the efficacy analysis is.*
 
-The objective of the efficacy analysis is to determine if the continuous abstinance from smoking across the last 4 weeks of the study is sufficient to conclude that the QUITNOW device has enough benefit to be worth further study. 
+The objective of the efficacy analysis is to determine if the continuous abstinence from smoking across the last 4 weeks of the study is sufficient to conclude that the QUITNOW device has enough benefit to be worth further study. 
 
 
 ## Parameter to Estimate and Hypothesis
@@ -87,15 +89,29 @@ Optimistic: Beta(6,9)
 Pessimistic: Beta(4, 28)
 
 **Likelihoods**
-Primary analysis: 
-Optimistic: 
-Pessimistic: 
+```{r}
+dbinom(7,50,0.124)
+y <- 7
+((0.124)^y)*((1-0.124)^(y-50))
+1+7
+1+50-7
+0.4*50
+6+20
+9+50-20
+0.125*50
+4+7
+28+50-7
+```
+
+Primary analysis: 0.124
+Optimistic: 0.4
+Pessimistic: 0.125
 
 **Posteriors**
 
-Primary analysis: 
-Optimistic: 
-Pessimistic: 
+Primary analysis: Beta(8, 44)
+Optimistic: Beta(26, 39)
+Pessimistic: Beta(11, 71)
 
 The reason for having optimistic and pessimistic priors is that we do not actually know if the QUITNOW device will perform more similarly to e-cigarettes in previous trials (optimistic) or placebo in previous trials (pessimistic). 
 
@@ -131,13 +147,13 @@ flextable(t)
 ### Outputs
 Describe what the program creates as a final result.
 
-The program will output a table, with columns as described in the tbale below. 
+The program will output a table, with columns as described in the table below. 
 
 ```{r echo = FALSE}
 t2 = data.frame(Output = c("Theta.test", "Result", "Value"), 
                Description = c("The value of theta being simulated", "Whether the type of result displayed is power or type I error", "The value of the simulated power/type I error"))
 
-flextable(t)
+flextable(t2)
 ```
 
 ### Algorithm
@@ -154,7 +170,7 @@ For each value of theta in theta test:
   
 Return table containing theta values and proportion of successes for each value of theta.
   
-After all simulations have run, $X = \frac{1}{N} \sum_{i=1}^N I (Pr\{𝜃> 0.124\} > 0.8)$ is calculated for each value of𝜃, with the value of the indicator function being the value in the success column. For each theta, the value of X is stored in a dataframe along with the value of theta and whether the value of X is a power calculation or a type I error calculation. 
+After all simulations have run, $X = \frac{1}{N} \sum_{i=1}^N I (Pr\{𝜃> 0.124\} > 0.8)$ is calculated for each value of𝜃, with the value of the indicator function being the value in the success column. For each theta, the value of X is stored in a data frame along with the value of theta and whether the value of X is a power calculation or a type I error calculation. 
 
 
 ## Program Code
