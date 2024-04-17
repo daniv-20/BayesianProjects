@@ -43,7 +43,7 @@ colnames(data) = c("Chick", "BaselineWeight", "EndWeight")
 
 *In this section you should give some brief background on the kinds of problems that the normal-normal model is appropriate for, what the target of inference is, and briefly introduce the example you are going to use.* 
 
-The normal-normal family of Bayesian models uses a Gaussian distribution to represent both the prior and likelihood functions. This family is well-suited to modeling continuous data, particularly where there are no upper or lower bounds on the values the data or parameter can take on. 
+The normal-normal family of Bayesian models uses a Gaussian distribution to represent both the prior and likelihood functions. This family is well-suited to modeling continuous data, particularly where there are no upper or lower bounds on the values the data or parameter can take on. Our target of inference is $\mu$.
 
 Our dataset is modified from ChickWeight (https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ChickWeight) from R. We want to determine if protein-rich feed (assuming all chicks in dataset were fed protein-rich feed) makes a significant difference in the end weight of the chick from the expected weight of a chick given non-protein-rich food. 
 
@@ -69,24 +69,162 @@ hist(subset(ChickWeight, Time == 21)$weight, main = "Distribution of Chick Weigh
 
 In our example, we are interested in finding the mean weight $\mu$ of the chicks in our dataset via a Bayesian analysis. Before we can estimate this with our dataset, we need to define a prior to represent the state of our existing knowledge. This prior will be defined using the normal distribution, which means we need to specify both our expected mean and our standard deviation. 
 
-From our prior research (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart), the mean bodyweight for layer poultry (chickens that will be used for egg production) is typically around 190 grams at three weeks old. The variance of the distribution shows the confidence we have in our prior - higher variance means we are less confident and $\mu$ could reasonably cover a larger range of values, while a smaller variance means we are more confident in our estimate. For this example, we use 47.5 grams as our standard deviation. Because this is 1/4th of the mean, it is not a very strong prior, and our data will strongly influence our posterior estimate of $\mu$.
+From our prior research (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart), the mean body weight for layer poultry (chickens that will be used for egg production) is typically around 190 grams at three weeks old. The variance of the distribution shows the confidence we have in our prior - higher variance means we are less confident and $\mu$ could reasonably cover a larger range of values, while a smaller variance means we are more confident in our estimate. For this example, we use 47.5 grams as our standard deviation. Because this is 1/4th of the mean, it is not a very strong prior, and our data will strongly influence our posterior estimate of $\mu$.
 
 
 # Normal Likelihood
 **Explain what a likelihood function is in general and show the equation for the normal likelihood, explaining each part of the function in plain English. Show the likelihood for your example data. Include a plot of the likelihood function and explain how to interpret it in plain English.**
 
-**Show how the likelihood function is derived. Go slowly (don't do too many steps of the algebra simultaneously) and explain each step you're taking. In particular, make sure to add in the bit that your textbook skips in Equation 5.13.**
+**Show how the likelihood function is derived. Go slowly (don't do too many steps of the algebra simultaneously) and explain each step you're taking. In particular, make sure to add in the bit that your textbook skips in Equation 5.13.**  
+
+A likelihood function is the probability density of the observed data viewed as a function of the parameters of a statistical model. In simpler terms the likelihood function is the probability of observing data *x* assuming $\theta$ is the actual parameter. The maximum value in the distribution is the maximum likelihood estimate is the point estimate for $\theta$ of the likelihood function.  
+
+Our normal likelihood distribution function of $\mu$ is found from $L(\mu|\vec{y} = f(\vec{y}|\mu)$. Now assume that $\sigma$ is a known constant, we can simplify that the likelihood up to a proportionality constant by dropping the terms that don't depend upon $\mu$. So for a $\mu \in (-\infty,\infty)$, we have that the likelihood is calculated from:  
+
+$L(\mu | \vec{y}) \propto \prod_{i=1}^{n} \exp\left[ -\frac{(y_i - \mu)^2}{2\sigma^2} \right] = \exp\left[ -\sum_{i=1}^{n} \frac{(y_i - \mu)^2}{2\sigma^2} \right]$  
+
+This can be simplified down, starting from $\exp\left[ -\sum_{i=1}^{n} \frac{(y_i - \mu)^2}{2\sigma^2} \right]$.  
+
+$$L(\mu | \vec{y}) \propto \exp\left[ -\sum_{i=1}^{n} \frac{(y_i - \mu)^2}{2\sigma^2} \right]$$  
+
+First we take to log of the formula to remove the exponents
+
+$$ln(L(\mu | \vec{y})) \propto ln(\exp\left[ -\sum_{i=1}^{n} \frac{(y_i - \mu)^2}{2\sigma^2} \right])$$  
+
+$$=-\sum_{i=1}^{n} \frac{(y_i - \mu)^2}{2\sigma^2}$$  
+
+Next we separate the fraction so that it is easier to deal with the summation value  
+
+$$=-\frac{1}{2\sigma^2}(\sum_{i=1}^{n} (y_i - \mu)^2)$$  
+
+Next we break down the summation variable into similar terms, by squaring the values  
+
+$$=-\frac{1}{2\sigma^2}(\sum_{i=1}^{n}(y_i^2-2y_i\mu+\mu^2))$$  
+
+Then we distribute out our summation symbol, constants are pulled out of the summation and go to the front & when a summation is placed with a constant we multiple the constant by *n*.  
+
+$$=-\frac{1}{2\sigma^2}(\sum_{i=1}^n(y_i^2)-2\mu\sum_{i=1}^n(y_i)+n(\mu^2))$$  
+
+This gives us  
+
+$$=-\frac{1}{2\sigma^2}(\sum_{i=1}^n(y_i^2)-2\mu\bar{y}n+n\mu^2)$$
+
+The we multiply by $\frac{\frac{1}{n}}{\frac{1}{n}}$ this is equal to $1$ so it does not effect the left side of the equation  
+
+$$= \frac{\frac{1}{n}}{\frac{1}{n}}(-\frac{1}{2\sigma^2}(\sum_{i=1}^n(y_i^2)-2\mu\bar{y}n+n\mu^2))$$  
+
+$$=\frac{\frac{1}{n}}{\frac{1}{n}}(-\frac{\sum_{i=1}^n(y_i^2)-2\mu\bar{y}n+n\mu^2)}{2\sigma^2})$$  
+
+$$ = -\frac{\frac{1}{n}\sum_{i=1}^n(y_i^2)-2\mu\bar{y}n+n\mu^2)}{2\sigma^2/n}$$  
+
+We reduce this to 
+
+$$ = -\frac{(\bar{y}^2-2\mu\bar{y}+\mu^2)}{2\sigma^2/n}$$  
+
+Then we simplify the numerator to  
+
+$$-\frac{(\bar{y}-\mu)^2}{2\sigma^2/n}$$
+
+
+Then we undo the $ln()$ by exponenting the equation on both sides and we are left with the likelihood function as shown in $5.13$: 
+
+$$L(\mu|\vec{y}) \propto exp[-\frac{(\bar{y}-\mu)^2}{\frac{2\sigma^2}{n}}] \\
+\text{where} \ \mu \in (-\infty, \infty)$$  
+
+Now let us break this down into parts. The initial part, $L(\mu|\vec{y})$ is the likelihood function that represents the probability of observing the data $\vec{y}$ given the mean parameter $\mu$. We have this probability proportional to our exponent values. The exponential values is the exponential of the squared difference between the sample mean and population mean divided by 2 times the population variance divided by our sample size. This tells how far apart the sample mean is from the population mean then we divide by a precision term, the larger the precision the better. This can be done from a value of $\mu$ from $(-\infty,\infty)$.  
+
+Now considering our data we have a likelihood function as follows, we have a population mean of 190 grams. 
+
+$$L(190|\text{End Weight}) \propto exp[-\frac{(\overline{\text{End Weight}}-190)^2}{\frac{2*47.5^2}{45}}] \\ 
+\propto exp[-\frac{(\overline{\text{End Weight}}-190)^2}{100.2778}]$$
+
+Now to plot a likelihood function we have for our data with the population standard deviation:
+
+```{r}
+bayesrules::plot_normal_likelihood(data$EndWeight, sigma = 71.51027)
+```
+
+This plot represents the observed end weights and standard deviation in the likelihood distribution. We can see that mean of the end weight is more likely to between 215 grams and 225 grams. The most likely mean of the end weights is about 218 grams, but can easily be any of the values around 218 grams.  
 
 # Normal-Normal Posterior
 
 ## Balance of Prior Information and New Data
-**Design a graphical illustration of how prior information and new data are weighted differently in the normal-normal model.**
+**Design a graphical illustration of how prior information and new data are weighted differently in the normal-normal model.**  
+
+```{r}
+bayesrules::plot_normal_normal(mean = 190, sd = sd(data$EndWeight), sigma = 47.5,
+                   y_bar = mean(data$EndWeight), n = 45)
+``` 
+
+Here we can see a prior, likelihood, and a posterior distributions. Using our data, with the prior using the data information from the averages and the standard deviation from the population. The likelihood using the distributions from our data to get eh posterior. This graph shows how that the mean of likelihood distribution has a larger influence than the prior distribution, especially when it is a non-informative prior.
+
 
 ## Posterior Distribution for the Example
-*Show the posterior distribution, using equations and plots, for your example data set. Report a 95% equal tailed credible interval. Also report a posterior probability that is clinically relevant based on your example.*
+*Show the posterior distribution, using equations and plots, for your example data set. Report a 95% equal tailed credible interval. Also report a posterior probability that is clinically relevant based on your example.*  
+
+Posterior Distribution Equation:
+
+$$\mu|\vec{y} \sim N(\theta\frac{\sigma^2}{n\tau^2+\sigma^2}+\bar{y}\frac{n\tau^2}{n\tau^2+\sigma^2},\frac{\tau^2\sigma^2}{n\tau^2+\sigma^2})$$  
+
+Thus for our data we have the equation equal to:  
+
+$$\mu|\vec{y} \sim N(190\frac{71.51027^2}{45(47.5^2)+71.51027^2}+218.6889\frac{45(47.5^2)}{45(47.5^2)+71.51027^2},\frac{47.5^2(71.51027^2)}{45(47.5^2)+71.51027^2}) \\ 
+\mu|\vec{y} \sim N(9.562797+208.2025, 108.1891) 
+\\ 
+\mu|\vec{y} \sim N(217.7653, 108.1891)$$  
+
+```{r}
+bayesrules::plot_normal_normal(mean = 190, sd = 47.5, sigma = 71.51027,
+                        y_bar = 218.6889, n = 45)
+
+bayesrules::summarize_normal_normal(mean = 190, sd = 47.5, sigma = 71.51027,
+                        y_bar = 218.6889, n = 45)
+pnorm(209, mean = 217.3132, sd = 10.4014, lower.tail = FALSE)
+
+```
+The 95% confidence interval is calculated as follows $217.3132 \pm 1.96(\frac{10.4014}{\sqrt{45}})$. So we have a 95% credible interval of our posterior distribution is $(214.274,220.352)$. Now to understand if the new diet is successful we want to have an 80% probability of the end weight being 209 grams or above. Looking at our posterior distribution we have that 78.8% of our chicks have a weight of 209 grams or above. This means that we have that the new diet is not clinically successful.  
+
 
 ## Derivation of the Posterior Distribution 
-*\textbf{EXTRA CREDIT: }Show the derivation of the posterior distribution for the normal-normal model. The textbook provides an example in Section 5.3.4. See if you can improve on the clarity of this illustration by showing each step in detail and explaining each step as you go. *
+*\textbf{EXTRA CREDIT: }Show the derivation of the posterior distribution for the normal-normal model. The textbook provides an example in Section 5.3.4. See if you can improve on the clarity of this illustration by showing each step in detail and explaining each step as you go. *  
+
+Let us go step-by-step through the derivation of the posterior distribution  
+
+$$f(\mu|\vec{y}) \propto f(\mu)L(\mu|\vec{y}) \propto exp[\frac{-(\mu-\theta)^2}{2\tau^2}]exp[-\frac{(\bar{y}-\mu)^2}{2\sigma^2/n}]$$  
+
+Next we expand the exponents out to get  
+
+$$f(\mu|\vec{y}) \propto f(\mu)L(\mu|\vec{y}) \propto exp[\frac{-\mu^2+2\mu\theta-\theta^2}{2\tau^2}]exp[\frac{-\mu^2+2\mu\bar{y}-\bar{y}^2}{2\sigma^2/n}]$$
+We can combine these exp through algebra:  
+$$\propto exp[\frac{-\mu^2+2\mu\theta-\theta^2}{2\tau^2}+\frac{-\mu^2+2\mu\bar{y}-\bar{y}^2}{2\sigma^2/n}]$$  
+
+From here we can simplify this equation:  
+
+$$\propto exp[\frac{-\mu^2+2\mu\theta-\theta^2}{2\tau^2}-\frac{\mu^2}{2\sigma^2/n}+\frac{2\mu\bar{y}-\bar{y}^2}{2\sigma^2/n}]
+\\
+\propto exp[\frac{-\mu^2+2\mu\theta}{2\tau^2}-\frac{\theta^2}{2\tau^2}-\frac{\mu^2}{2\sigma^2/n}+\frac{2\mu\bar{y}}{2\sigma^2/n}-\frac{\bar{y}^2}{2\sigma^2/n}]
+\\
+\propto exp[\frac{-\mu^2+2\mu\theta}{2\tau^2}]exp[\frac{-\mu^2+2\mu\bar{y}}{2\sigma^2/n}]$$  
+
+Now let us make sure that the there are common denominators so we can combine them into a single exponent:  
+
+$$\propto exp[\frac{(-\mu^2+2\mu\theta)\sigma^2/n}{2\tau^2\sigma^2/n}]exp[\frac{-\mu^2+2\mu\bar{y}-\bar{y}^2}{2\tau^2\sigma^2/n}]
+\\
+\propto exp[\frac{(-\mu^2+2\mu\theta)\sigma^2+(-\mu^2+2\mu\bar{y})n\tau^2}{2\tau^2\sigma^2}]$$  
+
+Now we will combine like terms:
+
+$$\propto exp[\frac{-\mu^2(n\tau^2+\sigma^2)+2\mu(\theta\sigma^2+\bar{y}n\tau^2)}{2\tau^2\sigma^2}]
+\\
+\propto exp[\frac{-\mu^2+2\mu\frac{\theta\sigma^2+\bar{y}n\tau^2}{n\tau^2+\sigma^2}}{2(\tau^2\sigma^2)/(n\tau^2+\sigma^2)}]$$  
+
+Now we can bring back some constant which do not depend upon $\mu$ to complete the square in the numerator:  
+
+$$f(\mu|\vec{y}) \propto exp[\frac{-(\mu-\frac{\theta\sigma^2+\bar{y}n\tau^2}{n\tau^2+\sigma^2})^2}{2(\tau^2\sigma^2)/(n\tau^2+\sigma^2)}]$$  
+
+Then we complete the square, we get the kernel of the normal pdf for $\mu$, $exp[-\frac{(\mu-v)^2}{2v^2}]$. By identifying the missing pieces denoted by $v$, we can conclude that the distribution for the posterior is:   
+
+$$\mu|\vec{y} \sim N(\frac{\theta\sigma^2+\bar{y}n\tau^2}{n\tau^2+\sigma^2},\frac{\tau^2\sigma^2}{n\tau^2+\sigma^2})$$
 
 # MCMC Simulation
 *Use RStan to simulate the posterior distribution for your example. Overlay a plot of the actual posterior based on the conjugate model to show how close the MCMC simulation is to the real thing. Use the MCMC simulated posterior to estimate the same clinically relevant posterior probability that you estimated above. Explain what is different about how you are finding this posterior probability as compared to the method you used based on the conjugate family analysis.*
