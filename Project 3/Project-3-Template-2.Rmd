@@ -47,7 +47,7 @@ The normal-normal Bayesian model is a useful framework for the analysis of conti
 
 For this example, we are investigating whether feeding chicks a protein-rich diet affects their final weight compared to the expectation of weight for chicks fed with a non-protein-rich diet. Our dataset is modified from ChickWeight (https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ChickWeight) from R. 
 
-Our specific objective is to quantify the impact of a protein-rich diet on the expected weight ($\mu$) of chicks, leveraging Bayesian inference with a normal-normal model. This approach allows us to incorporate prior beliefs about $\mu$ (the mean weight under a non-protein-rich diet) and update these beliefs based on observed data to estimate the effect of the protein-rich feed.
+Our specific objective is to quantify the impact of a protein-rich diet on the expected weight (μ) of chicks, leveraging Bayesian inference with a normal-normal model. This approach allows us to incorporate prior beliefs about μ (the mean weight under a non-protein-rich diet) and update these beliefs based on observed data to estimate the effect of the protein-rich feed.
 
 Next, we'll delve into setting up the model and conducting Bayesian analysis to address this question effectively.
 
@@ -58,7 +58,7 @@ Next, we'll delve into setting up the model and conducting Bayesian analysis to 
 
 The normal distribution, also referred to as the Gaussian distribution, is the most common distribution used in statistical modeling. It is characterized by its bell-shaped curve, which is symmetric around its mean ($\mu$). 
 
-In cases where we know the mean and typical variance in our data, and where we expect the data we sample to be symmetrically distributed on either side of the mean, many different random processes result in a normal sampling distribution. The symmetry is convenient, because if we can specify the mean of the distribution, we know that will also be equivalent to both the median and the mode. In other words, mean, median, and mode of a normal distribution are all equal and located at $\mu$.
+In cases where we know the mean and typical variance in our data, and where we expect the data we sample to be symmetrically distributed on either side of the mean, many different random processes result in a normal sampling distribution. The symmetry is convenient, because if we can specify the mean of the distribution, we know that will also be equivalent to both the median and the mode. In other words, mean, median, and mode of a normal distribution are all equal and located at μ.
 
 Also convenient is the fact that the mean and variance are defined independently of each other, allowing us to freely adjust the shape and location of our distribution as needed. The variance controls the spread of the distribution, with a larger variance meaning the data points are further from the mean and a smaller variance meaning they are clustered closer to the mean. 
 
@@ -74,7 +74,7 @@ Normal distributions are useful for modeling the distribution of data which is c
 
 ### Example Use of Normal Distribution  
 
-In the context of the ChickWeight dataset, suppose we are interested in modeling the final weights of chicks after being fed a protein-rich diet. Let's say the final weights follow a normal distribution with a mean $\mu$ = `r signif(mean(subset(ChickWeight, Time == 21)$weight), 3)` and a standard deviation $\sigma$ = `r signif(sd(subset(ChickWeight, Time == 21)$weight), 3)`.
+In the context of the ChickWeight dataset, suppose we are interested in modeling the final weights of chicks after being fed a protein-rich diet. Let's say the final weights follow a normal distribution with a mean μ = `r signif(mean(subset(ChickWeight, Time == 21)$weight), 3)` and a standard deviation σ = `r signif(sd(subset(ChickWeight, Time == 21)$weight), 3)`.
 
 In standard notation, this is written as $\text{Final Weight} \sim N (219, 30^2)$. 
 
@@ -90,7 +90,7 @@ Understanding and applying the normal distribution allows us to make probabilist
 
 ### The role of the prior in Bayesian inference
 
-A prior distribution allows us to incorporate our beliefs and prior knowledge about the parameter of interest. It influences the posterior distribution (our updated belief about $\mu$ after observing data) through Bayesian updating and helps balance the influence of observed data with prior beliefs. We select what type of distribution (normal, beta, etc) we want to use for our prior based on the range of plausible values the parameter of interest can take. 
+A prior distribution allows us to incorporate our beliefs and prior knowledge about the parameter of interest. It influences the posterior distribution (our updated belief about μ after observing data) through Bayesian updating and helps balance the influence of observed data with prior beliefs. We select what type of distribution (normal, beta, etc) we want to use for our prior based on the range of plausible values the parameter of interest can take. 
 
 The normal distribution is one type of prior distribution that can be used to describe what we know or assume about our target parameter, $\mu$, based on prior knowledge, previous studies or expert opinion before observing any of our data. The prior mean, $\mu_0$, represents our best guess or expectation of the parameter before seeing our data. The prior variance, $\sigma_0^2$, reflects the uncertainty of our expectations about the parameter $\mu$. A larger variance implies that we are more uncertain about the value of $\mu$ or that there is a wider range of plausible values for it. A smaller variance implies that we are more confident in our prior estimate for $\mu$.
 
@@ -98,7 +98,7 @@ In our example, we are interested in finding the mean weight $\mu$ of the chicks
 
 **In the ChickWeight example:** 
 
-In our ChickWeight example, we aim to estimate the mean weight ($\mu$) of chicks fed a protein-rich diet using Bayesian analysis. Before examining the dataset, we establish a prior distribution for $\mu$:  
+In our ChickWeight example, we aim to estimate the mean weight (μ) of chicks fed a protein-rich diet using Bayesian analysis. Before examining the dataset, we establish a prior distribution for μ:  
 
 * **Prior Mean (**$\mu_0$**)**:  Based on our research (https://www.agrifarming.in/poultry-feed-chart-and-weight-chart#layer-poultry-feed-chart-and-weight-chart), the mean body weight for layer poultry at three weeks old is around 190 grams. Hence, we set $\mu_0 = 190 \text{ grams}$.
 
@@ -106,9 +106,9 @@ In our ChickWeight example, we aim to estimate the mean weight ($\mu$) of chicks
 
 By defining our prior as $\mu \sim N(190, 47.5^2)$, we are saying that, before observing any data, we believe that $\mu$ is around 190 grams, but we are not certain of this estimate. 
 
-As we observe the chick weights, Bayesian updating will adjust our belief about $\mu$ from the prior distribution to the posterior distribution, reflecting our updated understanding based on both prior knowledge and observed data.
+As we observe the chick weights, Bayesian updating will adjust our belief about μ from the prior distribution to the posterior distribution, reflecting our updated understanding based on both prior knowledge and observed data.
 
-In the subsequent steps of our analysis, we'll combine this prior with the likelihood function (derived from the observed data) to derive the posterior distribution of $\mu$, which will guide our inference about the effect of protein-rich feed on chick weights. The strength of the prior, relative to the observed data, will determine the degree to which our prior beliefs influence our final conclusions.
+In the subsequent steps of our analysis, we'll combine this prior with the likelihood function (derived from the observed data) to derive the posterior distribution of μ, which will guide our inference about the effect of protein-rich feed on chick weights. The strength of the prior, relative to the observed data, will determine the degree to which our prior beliefs influence our final conclusions.
 
 # Normal Likelihood
 **Explain what a likelihood function is in general and show the equation for the normal likelihood, explaining each part of the function in plain English. Show the likelihood for your example data. Include a plot of the likelihood function and explain how to interpret it in plain English.**
@@ -199,15 +199,15 @@ bayesrules::plot_normal_normal(mean = 190, sd = sd(data$EndWeight), sigma = 47.5
 ### Components of the Plot:
 **Prior Distribution:**
 
-The prior distribution, represented by the yellow curve, encapsulates our beliefs about the parameter $\mu$ (mean weight of chicks) before observing any data. In this example, the prior is specified with a mean of 190 grams and a standard deviation of 47.5 grams. The width of this curve reflects our uncertainty or variability in the prior belief.
+The prior distribution, represented by the yellow curve, encapsulates our beliefs about the parameter μ (mean weight of chicks) before observing any data. In this example, the prior is specified with a mean of 190 grams and a standard deviation of 47.5 grams. The width of this curve reflects our uncertainty or variability in the prior belief.
 
 **Likelihood Distribution:**
 
-The likelihood distribution, depicted by the blue curve, is derived from the observed data. It represents how likely different values of $\mu$ are given the observed data (end weights of chicks). The likelihood is influenced heavily by the data and tends to be narrower compared to the prior, focusing more sharply around the observed data's central tendency.
+The likelihood distribution, depicted by the blue curve, is derived from the observed data. It represents how likely different values of μ are given the observed data (end weights of chicks). The likelihood is influenced heavily by the data and tends to be narrower compared to the prior, focusing more sharply around the observed data's central tendency.
 
 **Posterior Distribution:**
 
-The posterior distribution, shown in green, is the updated belief about $\mu$ after combining the prior and likelihood. It represents our current understanding of $\mu$ considering both prior knowledge and observed data. The posterior distribution is the result of Bayesian inference, where the influence of the prior and likelihood is balanced based on their respective uncertainties and information content.
+The posterior distribution, shown in green, is the updated belief about μ after combining the prior and likelihood. It represents our current understanding of μ considering both prior knowledge and observed data. The posterior distribution is the result of Bayesian inference, where the influence of the prior and likelihood is balanced based on their respective uncertainties and information content.
 
 ### Interpretations
 
