@@ -98,7 +98,7 @@ $$\beta_0 \sim N (\mu_{\beta_0} = -1.386, \sigma_{\beta_0}^2 = 0.597^2)$$
 $$\beta_1 \sim N (\mu_{\beta_1} = 0.539, \sigma_{\beta_1}^2 = 1.359^2)$$
 
 
-```{r, include=F}
+```{r, include=T}
 
 library(rstanarm)
 library(bayesplot)
@@ -127,6 +127,32 @@ mean.b1 = mean(samples[, "priorfrac.b"])
 median.b1 = median(samples[, "priorfrac.b"])
 cred.int = hdi(samples[, "priorfrac.b"])
 
+## theoretical prior -> symmetric so mean = median
+mu = 0.539
+var = sd1
+sigma = sqrt(var)
+
+ciLower = mu - 2 * sqrt(var)
+ciUpper = mu + 2 * sqrt(var)
+
+probLower = exp(ciLower)/(1 + exp(ciLower))
+probUpper = exp(ciUpper)/(1 + exp(ciUpper))
+
+round(probLower, 2)
+round(probUpper, 2)
+
+curve(dnorm(x, mu, sigma), from = mu-3*sigma, to=mu+3*sigma, axes = FALSE, xlab = "Beta1", ylab = "Density", main = "Prior Distribution for Centered Beta1 \n(Theoretical Prior)")
+
+axis(1, at=c(mu-3*sigma, mu-2*sigma, mu-sigma, mu,
+mu+sigma, mu+2*sigma, mu+3*sigma)
+)
+
+
+
+# Plot the prior distribution for the slope coefficient, Beta1
+mcmc_dens(mod,pars=c("priorfrac.b")) +
+scale_x_continuous(name="Log Odds") +
+ggtitle("MCMC Prior for Beta1")
 
 
 ```
