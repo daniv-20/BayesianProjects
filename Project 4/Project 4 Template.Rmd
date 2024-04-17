@@ -162,6 +162,13 @@ ost %>%
   geom_line(aes(y = .linpred, group = .draw), size = 0.1)
 
 ```
+
+#### Theoretical Prior
+
+The mean, and median, because the prior is symmetrical, of $\beta_1$ is `r mu` with a 95% CI of `r signif(ciLower, 2)` to `r signif(ciUpper, 2)`. In other words, the average expected increase in log odds of fracture associated with having a prior history of fracture is `r mu`, with a 95% credible interval of`r signif(ciLower, 2)` to `r signif(ciUpper, 2)`.
+
+#### MCMC Prior
+
 The mean of $\beta_1$, `r signif(mean.b1, 2)`, is the average expected increase in log odds of fracture associated with having a prior history of fracture compared to not having prior history. The median, `r signif(median.b1, 2)` is the center value of the distribution of $\beta_1$. The 95% credible interval `r signif(cred.int[1], 2)` to `r signif(cred.int[2], 2)`, so there is a 95% probability of that the true median estimate is between `r signif(cred.int[1], 2)` and `r signif(cred.int[2], 2)`. 
 
 # Question 3: Update your prior belief using the OSTEO data
