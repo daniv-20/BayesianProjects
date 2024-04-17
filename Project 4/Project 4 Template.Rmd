@@ -98,7 +98,7 @@ $$\beta_0 \sim N (\mu_{\beta_0} = -1.386, \sigma_{\beta_0}^2 = 0.597^2)$$
 $$\beta_1 \sim N (\mu_{\beta_1} = 0.539, \sigma_{\beta_1}^2 = 1.359^2)$$
 
 
-```{r, include=F}
+```{r, include=F, echo=T}
 
 library(rstanarm)
 library(bayesplot)
@@ -106,8 +106,8 @@ library(tidyverse)
 library(tidybayes)
 library(broom.mixed)
 
-sd0 = 0.597^2; sd0
-sd1 = 1.359^2; sd1
+sd0 = 0.597^2
+sd1 = 1.359^2
 
 mod = stan_glm(fracture.b ~ priorfrac.b, 
                data = ost, 
@@ -125,10 +125,13 @@ samples = as.matrix(mod)
 summary(samples)
 mean.b1 = mean(samples[, "priorfrac.b"])
 median.b1 = median(samples[, "priorfrac.b"])
+
 cred.int = hdi(samples[, "priorfrac.b"])
+cred.int.exp = hdi(exp(samples[, "priorfrac.b"]))
+med.b1.exp = median(samples[, "priorfrac.b"])
 
-
-
+mod_df <- as.data.frame(samples)
+ggplot(data = mod_df) + geom_density(aes(x = priorfrac.b), fill = "blue", alpha = 0.25) + geom_vline(xintercept = median.b1, color = "black") + geom_vline(xintercept = cred.int[1], color = "green3") + geom_vline(xintercept = cred.int[2], color = "green3") + ggtitle("Log-Odds Scale")
 ```
 The mean of $\beta_1$, `r signif(mean.b1, 2)`, is the average expected increase in log odds of fracture associated with having a prior history of fracture compared to not having prior history. The median, `r signif(median.b1, 2)` is the center value of the distribution of $\beta_1$. The 95% credible interval `r signif(cred.int[1], 2)` to `r signif(cred.int[2], 2)`, so there is a 95% probability of that the true median estimate is between `r signif(cred.int[1], 2)` and `r signif(cred.int[2], 2)`. 
 
