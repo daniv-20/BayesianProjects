@@ -19,7 +19,7 @@ library(bayesplot)
 library(ggpubr)
 library(flextable)
 library(ggplot2)
-library(dpl)
+library(dplyr)
 source(here::here("bayesSim.R"))
 set.seed(2648)
 knitr::opts_chunk$set(echo = TRUE)
@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 The goal of the safety monitoring rule is to set a trigger for determining when the rate of severe adverse events is too high. A maximum acceptable rate is pre-specified, and if we are confident that the probability exceeds this level, the study is discontinued. 
 
 ## Parameter to Estimate and Hypothesis
-The parameter we try to estimate for the safety monitoring rule is the proability $\theta$ that a patient will have an adverse event of Grade 3 (severe) or higher. We define our maximum clinically acceptable risk level as $\theta_{mcid}$ = 0.05; our safety monitoring rule is triggered if there is a greater than 80% chance that $\theta > \theta_{mcid}$. 
+The parameter we try to estimate for the safety monitoring rule is the probability $\theta$ that a patient will have an adverse event of Grade 3 (severe) or higher. We define our maximum clinically acceptable risk level as $\theta_{mcid}$ = 0.05; our safety monitoring rule is triggered if there is a greater than 80% chance that $\theta > \theta_{mcid}$. 
 
 ## Statistical Model
 
@@ -39,7 +39,7 @@ The beta-binomial model is a functional family of a prior (beta distribution) an
 
 
 ### Prior
-The prior distribution represents our knowledge of the adverse event rate before conducting the study. We use a $Beta(1,1)$ prior, which contains no information about the parameter, to represent our lack of informaton about the event rate.
+The prior distribution represents our knowledge of the adverse event rate before conducting the study. We use a $Beta(1,1)$ prior, which contains no information about the parameter, to represent our lack of information about the event rate.
 
 ### Likelihood
 The likelihood function represents the chance of observing the number of events seen in the trial, given a proposed risk level. We define this mathematically using a $Binomial(N_{events}, N_{total}, \theta)$ distribution. This provides an empirical estimate of the event rate parameter.
@@ -131,13 +131,13 @@ flextable(t)
 ### Outputs
 Describe what the program creates as a final result.
 
-The program will output a table, with columns as described in the tbale below. 
+The program will output a table, with columns as described in the table below. 
 
 ```{r echo = FALSE}
 t2 = data.frame(Output = c("Theta.test", "Result", "Value"), 
                Description = c("The value of theta being simulated", "Whether the type of result displayed is power or type I error", "The value of the simulated power/type I error"))
 
-flextable(t)
+flextable(t2)
 ```
 
 ### Algorithm
@@ -146,7 +146,7 @@ Describe how the program operates to produce output from the input. You can use 
 The program works as follows:
 
 For each value of theta in theta test: 
-  1. Use rbinom() with N, SampleSize and theta to get a vector of N simulated Y values where Y is the number of simulated successes.
+  1. Use rbinom() with N, Sample Size and theta to get a vector of N simulated Y values where Y is the number of simulated successes.
   2. Use get_beta_post() (a self-made function included in bayesSim.R) to get the posterior alpha and beta using each of the primary, optimistic and pessimistic priors and the simulated Y values
   3. Calculate the probability of (𝜃 > 0.124) for each posterior
   4. Using those values, if the probability is > 0.8, store 1 (success) for that trial and if not store 0 for that trial
@@ -154,7 +154,7 @@ For each value of theta in theta test:
   
 Return table containing theta values and proportion of successes for each value of theta.
   
-After all simulations have run, $X = \frac{1}{N} \sum_{i=1}^N I (Pr\{𝜃> 0.124\} > 0.8)$ is calculated for each value of𝜃, with the value of the indicator function being the value in the success column. For each theta, the value of X is stored in a dataframe along with the value of theta and whether the value of X is a power calculation or a type I error calculation. 
+After all simulations have run, $X = \frac{1}{N} \sum_{i=1}^N I (Pr\{𝜃> 0.124\} > 0.8)$ is calculated for each value of𝜃, with the value of the indicator function being the value in the success column. For each theta, the value of X is stored in a data frame along with the value of theta and whether the value of X is a power calculation or a type I error calculation. 
 
 
 ## Program Code
