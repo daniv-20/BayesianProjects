@@ -390,7 +390,7 @@ pprb <- length(which(mcd$`priorfrac.b:age`<0)) / nrow(mcd)
 
 The median of the interaction OR is `r signif(med.exp,3)` [95% CI: `r signif(ci.exp[1],3)` - `r signif(ci.exp[2],3)`]. In words the odds ratio of fracture for participants of those with prior fractures compared to without prior fractures is approximately `r signif(med.exp,3)`. There is a 95% probability that the true median of the interaction OR is between `r signif(ci.exp[1],3)` and `r signif(ci.exp[2],3)`, given our observed data. With the interaction included in the model, the distribution of the coefficient associated with previous fracture history has not shifted significantly compared to the linear model with age involved. This makes sense, because if age does not have significant interaction with prior fracture history, then including the interaction term would not explain much of the residual variation and the priorfrac coefficient would not have to shift much.
 
-`r signif(pprb,3)*100`% of the confidence interval is one one side of zero, so we can say that there is strong evidence of an interaction between age and prior history of fracture, even if the effect is small.
+`r signif(pprb,3)*100`% of the confidence interval is on one side of zero, so we can say that there is strong evidence of an interaction between age and prior history of fracture, even if the effect is small.
 
 
 # Question 6: Predicting Fracture Risk Based on Prior History and Age
