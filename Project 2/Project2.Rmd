@@ -74,7 +74,7 @@ In the above table we see the probability that the risk level is greater than th
 ## Objective
 *Describe in your own words what the objective of the efficacy analysis is.*
 
-The objective of the efficacy analysis is to determine if the continuous abstinence from smoking across the last 4 weeks of the study is sufficient to conclude that the QUITNOW device has enough benefit to be worth further study. 
+The objective of the efficacy analysis is to determine if the continuous abstinence from smoking across the last 4 weeks of the study is sufficient to conclude that    the QUITNOW device has enough benefit to be worth further study. 
 
 
 ## Parameter to Estimate and Hypothesis
@@ -86,7 +86,6 @@ The parameter to be estimated in the efficacy analysis is the proportion of part
 
 ## Statistical Model
 *Show the statistical model for the analysis, including prior, likelihood and posterior distribution. State these mathematically and in plain English as they relate to the objectives of the study. Note, there are 3 priors discussed in the protocol: one used for the primary analysis and two used for sensitivity analyses, the "optimistic" and "pessimisic" priors. Discuss why these priors are labeled as optimistic or pessimistic and what impact you think they might have on the posterior distribution.*
-
 
 **Priors**
 Primary analysis: $Beta(1,1)$
@@ -207,3 +206,9 @@ qn.sim(N=10000, SampleSize = 50, Theta.test = c(0.375, 0.1875)) %>% flextable()
 ```{r, tbl.cap = "Bayesian Type I Error"}
 qn.sim(N=10000, SampleSize = 50, Theta.test = c(0.025, 0.05, 0.075, 0.10, 0.124)) %>% flextable()
 ```
+
+#### Contributions
+
+* Sam: Safety monitoring rule
+* Suz: Efficacy analysis
+* Dani: Efficacy analysis
