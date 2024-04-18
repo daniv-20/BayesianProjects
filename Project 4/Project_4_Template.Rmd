@@ -12,7 +12,7 @@ urlcolor: blue
 header-includes: \usepackage{xcolor}
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
 library(rstanarm)
 library(tidyverse)
@@ -173,7 +173,7 @@ The graph of 100 models that represent the prior belief about the effects of pri
 
 Now, use the OSTEO data set to update your priors. Plot the posterior distribution for the change in log-odds of fracture at 1 year associated with a prior history of fracture. Interpret the median and 95% highest posterior density credible interval with respect to the research question about whether prior history of fracture is a risk factor for fracture at 1 year after diagnosis with osteoporosis. Repeat these steps on the odds ratio scale. 
 
-```{r, include=F}
+```{r, include=TRUE}
 mod.post = update(mod, prior_PD = FALSE)
 
 print(mod.post, digits= 3)
